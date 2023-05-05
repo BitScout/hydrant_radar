@@ -24,11 +24,46 @@
 <body>
 <div id="map" style="width: 95%; height: 100%;"></div>
 <script>
-	var currentPositionIcon = L.icon({
-		iconUrl: 'icons/current_position.png',
+	const currentPositionIcon = L.icon({
+		iconUrl: 'current_position.png',
 		iconSize: [38, 95],
 		iconAnchor: [22, 94],
 		popupAnchor: [-3, -76],
+	});
+
+	var hydrantRedIcon = L.icon({
+		iconUrl: 'icon_hydrant_red.png',
+		iconSize: [64, 64],
+		iconAnchor: [32, 32],
+		popupAnchor: [0, 0],
+	});
+
+	var hydrantRedUndergroundIcon = L.icon({
+		iconUrl: 'icon_hydrant_red_underground.png',
+		iconSize: [64, 64],
+		iconAnchor: [32, 32],
+		popupAnchor: [0, -32],
+	});
+
+	var hydrantRedPillarIcon = L.icon({
+		iconUrl: 'icon_hydrant_red_pillar.png',
+		iconSize: [64, 64],
+		iconAnchor: [32, 32],
+		popupAnchor: [0, -32],
+	});
+
+	var hydrantBlueUndergroundIcon = L.icon({
+		iconUrl: 'icon_hydrant_blue_underground.png',
+		iconSize: [64, 64],
+		iconAnchor: [32, 32],
+		popupAnchor: [0, -32],
+	});
+
+	var hydrantBluePillarIcon = L.icon({
+		iconUrl: 'icon_hydrant_blue_pillar.png',
+		iconSize: [64, 64],
+		iconAnchor: [32, 32],
+		popupAnchor: [0, -32],
 	});
 
 	const initialPosition = [49.8022, 10.1603];
@@ -41,18 +76,25 @@
 	}).addTo(map);
 
 	var items = [];
-	const currentPositionMarker = L.marker(initialPosition, {title: 'Standort'}).addTo(map).bindPopup('Standort');
-	const distanceCircle = L.circle(initialPosition, {color: 'red', fillColor: '#f03', fillOpacity: 0.0, radius: 50}).addTo(map).bindPopup('50 m');
+	const currentPositionMarker = L.marker(initialPosition).addTo(map);
+	const distanceCircle100 = L.circle(initialPosition, {color: 'red', fillOpacity: 0.0, radius: 100}).addTo(map);
+	const distanceCircle200 = L.circle(initialPosition, {color: '#FF8888', fillOpacity: 0.0, radius: 200}).addTo(map);
+	const distanceCircle500 = L.circle(initialPosition, {color: '#FFC2C2', fillOpacity: 0.0, radius: 500}).addTo(map);
 
 	function addHydrant(item) {
 		var label = '';
+		var itemIcon = hydrantRedIcon;
 
 		switch(item.tags['fire_hydrant:type']) {
 			case 'underground':
 				label = 'Unterflurhydrant';
+				itemIcon = hydrantRedUndergroundIcon;
+				if(item.tags['colour'] == 'blue'){itemIcon = hydrantBlueUndergroundIcon;}
 				break;
 			case 'pillar':
 				label = 'Überflurhydrant';
+				itemIcon = hydrantRedPillarIcon;
+				if(item.tags['colour'] == 'blue'){itemIcon = hydrantBluePillarIcon;}
 				break;
 		}
 
@@ -60,7 +102,7 @@
 			label += ' ' + item.tags['fire_hydrant:diameter'] + ' mm'
 		}
 
-		L.marker([item.lat, item.lon], {title: 'label'}).addTo(map).bindPopup(label);
+		L.marker([item.lat, item.lon], {title: 'label', icon: itemIcon}).addTo(map).bindPopup(label);
 	}
 
 	function updateItems(lat, lon) {
@@ -94,7 +136,9 @@
 		//console.log(crd);
 
 		currentPositionMarker.setLatLng([crd.latitude, crd.longitude]);
-		distanceCircle.setLatLng([crd.latitude, crd.longitude]);
+		distanceCircle100.setLatLng([crd.latitude, crd.longitude]);
+		distanceCircle200.setLatLng([crd.latitude, crd.longitude]);
+		distanceCircle500.setLatLng([crd.latitude, crd.longitude]);
 		map.setView([crd.latitude, crd.longitude]);
 
 		const movementLimit = 0.003;
