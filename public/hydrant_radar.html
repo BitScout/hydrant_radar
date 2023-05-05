@@ -35,7 +35,7 @@
 	const map = L.map('map').setView(initialPosition, 19);
 	const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 		maxZoom: 19,
-		minZoom: 18,
+		minZoom: 17,
 		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 	}).addTo(map);
 
@@ -50,6 +50,9 @@
 			case 'underground':
 				label = 'Unterflurhydrant';
 				break;
+			case 'pillar':
+				label = 'Überflurhydrant';
+				break;
 		}
 
 		if(item.tags['fire_hydrant:diameter']) {
@@ -59,7 +62,7 @@
 		L.marker([item.lat, item.lon], {title: 'label'}).addTo(map).bindPopup(label);
 	}
 
-	function updateItems() {
+	function updateItems(lat, lon) {
 		// Overpass turbo example
 		// https://www.overpass-api.de/api/interpreter?data=[out:json];node["emergency"](49.800,10.155,49.808,10.168);out%20meta;
 		// [bbox:49.800, 10.155, 49.808, 10.168];
@@ -69,31 +72,32 @@
 		items.forEach((item, index) => {item.removeFrom(map);});
 
 		// Request Overpass turbo data
-		fetch('https://www.overpass-api.de/api/interpreter?data=[out:json];node["emergency"](49.800,10.155,49.808,10.168);out%20meta;')
+		const latLonRange = 0.01;
+		fetch('https://www.overpass-api.de/api/interpreter?data=[out:json];node["emergency"]('+(lat-latLonRange/2)+','+(lon-latLonRange)+','+(lat+latLonRange/2)+','+(lon+latLonRange)+');out%20meta;')
 				.then(response => response.json())
 				.then(response =>
 						response.elements.forEach((item, index) => {
-							console.log(item);
+							//console.log(item);
+
 							switch(item.tags['emergency']) {
 								case 'fire_hydrant':
 									addHydrant(item);
 									break;
 								default:
-									console.log(item.tags['emergency']);
+									//console.log(item.tags['emergency']);
 							}
-
 						})
 				)
 	}
 
 	function success(pos) {
 		const crd = pos.coords;
-		console.log(crd);
+		//console.log(crd);
 
 		currentPositionMarker.setLatLng([crd.latitude, crd.longitude]);
 		distanceCircle.setLatLng([crd.latitude, crd.longitude]);
 		map.setView([crd.latitude, crd.longitude]);
-		updateItems();
+		updateItems(crd.latitude, crd.longitude);
 	}
 
 	function error(err) {
