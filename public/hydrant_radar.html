@@ -1,0 +1,99 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<base target="_top">
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	
+	<title>Quick Start - Leaflet</title>
+	
+	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+
+	<style>
+		html, body {
+			height: 100%;
+			margin: 0;
+		}
+		.leaflet-container {
+			height: 100%;
+			width: 95%;
+			max-width: 95%;
+			max-height: 100%;
+		}
+	</style>
+
+	
+</head>
+<body>
+
+
+
+<div id="map" style="width: 95%; height: 100%;"></div>
+<script>
+	var currentPositionIcon = L.icon({
+		iconUrl: 'icons/current_position.png',
+		iconSize: [38, 95],
+		iconAnchor: [22, 94],
+		popupAnchor: [-3, -76],
+	});
+
+	const initialPosition = [49.8022, 10.1603];
+	const map = L.map('map').setView(initialPosition, 19);
+	const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		maxZoom: 19,
+		minZoom: 18,
+		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+	}).addTo(map);
+
+	var items = [];
+	const currentPositionMarker = L.marker(initialPosition, {title: 'foo'}).addTo(map).bindPopup('Unterflurhydrant 80');
+	const distanceCircle = L.circle(initialPosition, {color: 'red', fillColor: '#f03', fillOpacity: 0.0, radius: 50}).addTo(map).bindPopup('50 m');
+	
+	function updateItems() {
+		// Overpass turbo example
+		//[bbox:49.800, 10.155, 49.808, 10.168];
+		//node["emergency"];
+		//out body;
+		
+		// Request Overpass turbo data
+		fetch("https://overpass-api.de/api/interpreter", {
+		  method: "POST",
+		  headers: {
+			"Accept": "application/json",
+			"Content-type": "application/text; charset=UTF-8"
+		  },
+		  body: '[out:json]; [bbox:49.800, 10.155, 49.808, 10.168]; node["emergency"]; out body;'
+		})
+		.then((response) => console.log(response.json()));
+		
+		//items.forEach((item, index) => {item.removeFrom(map);});
+		
+		// add new items from Overpass turbo data
+		
+	}
+	
+	function success(pos) {
+	  const crd = pos.coords;
+	  console.log(crd);
+	  
+	  currentPositionMarker.setLatLng([crd.latitude, crd.longitude]);
+	  distanceCircle.setLatLng([crd.latitude, crd.longitude]);
+	  map.setView([crd.latitude, crd.longitude]);
+	  updateItems();
+	}
+
+	function error(err) {
+	  console.error(`ERROR(${err.code}): ${err.message}`);
+	}
+	
+	navigator.geolocation.watchPosition(success, error);
+</script>
+
+
+
+</body>
+</html>

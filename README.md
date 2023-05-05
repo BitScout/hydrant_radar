@@ -1,2 +1,3 @@
-# hydrant_radar
-A map of nearby fire hydrants
+# Hydrant Radar
+
+A map of nearby fire hydrants and other stuff
