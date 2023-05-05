@@ -84,22 +84,34 @@
 	function addHydrant(item) {
 		var label = '';
 		var itemIcon = hydrantRedIcon;
+		const blueWaterSources = ['powered_pump'];
 
 		switch(item.tags['fire_hydrant:type']) {
 			case 'underground':
 				label = 'Unterflurhydrant';
 				itemIcon = hydrantRedUndergroundIcon;
-				if(item.tags['colour'] == 'blue'){itemIcon = hydrantBlueUndergroundIcon;}
+				if(item.tags['colour'] == 'blue' || blueWaterSources.includes(item.tags['water_source'])){itemIcon = hydrantBlueUndergroundIcon;}
 				break;
 			case 'pillar':
 				label = 'Überflurhydrant';
 				itemIcon = hydrantRedPillarIcon;
-				if(item.tags['colour'] == 'blue'){itemIcon = hydrantBluePillarIcon;}
+				if(item.tags['colour'] == 'blue' || blueWaterSources.includes(item.tags['water_source'])){itemIcon = hydrantBluePillarIcon;}
 				break;
 		}
 
 		if(item.tags['fire_hydrant:diameter']) {
 			label += ' ' + item.tags['fire_hydrant:diameter'] + ' mm'
+		}
+
+		if(item.tags['water_source']) {
+			switch(item.tags['water_source']) {
+				case 'main':
+					label += '<br>Trinkwassernetz';
+					break;
+				case 'powered_pump':
+					label += '<br>Löschwassernetz';
+					break;
+			}
 		}
 
 		L.marker([item.lat, item.lon], {title: 'label', icon: itemIcon}).addTo(map).bindPopup(label);
