@@ -32,6 +32,7 @@
 	});
 
 	const initialPosition = [49.8022, 10.1603];
+	var lastUpdatedPosition = null;
 	const map = L.map('map').setView(initialPosition, 19);
 	const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 		maxZoom: 19,
@@ -63,12 +64,10 @@
 	}
 
 	function updateItems(lat, lon) {
-		// Overpass turbo example
-		// https://www.overpass-api.de/api/interpreter?data=[out:json];node["emergency"](49.800,10.155,49.808,10.168);out%20meta;
-		// [bbox:49.800, 10.155, 49.808, 10.168];
-		// node["emergency"];
-		// out body;
+		lastUpdatedPosition = [lat, lon];
+		//console.log('UPDATING for '+lat+' / '+lon);
 
+		// Remove existing hydrants etc from map
 		items.forEach((item, index) => {item.removeFrom(map);});
 
 		// Request Overpass turbo data
@@ -90,21 +89,28 @@
 				)
 	}
 
-	function success(pos) {
+	function positionChanged(pos) {
 		const crd = pos.coords;
 		//console.log(crd);
 
 		currentPositionMarker.setLatLng([crd.latitude, crd.longitude]);
 		distanceCircle.setLatLng([crd.latitude, crd.longitude]);
 		map.setView([crd.latitude, crd.longitude]);
+
+		const movementLimit = 0.003;
+		if(lastUpdatedPosition != null && (Math.abs(lastUpdatedPosition[0]-crd.latitude) < movementLimit || Math.abs(lastUpdatedPosition[1]-crd.longitude) < movementLimit)) {
+			//console.log('skipping request because '+Math.abs(lastUpdatedPosition[0]-crd.latitude)+' / '+Math.abs(lastUpdatedPosition[1]-crd.longitude));
+			return;
+		}
+
 		updateItems(crd.latitude, crd.longitude);
 	}
 
-	function error(err) {
+	function positionError(err) {
 		console.error(`ERROR(${err.code}): ${err.message}`);
 	}
 
-	navigator.geolocation.watchPosition(success, error);
+	navigator.geolocation.watchPosition(positionChanged, positionError);
 </script>
 </body>
 </html>
