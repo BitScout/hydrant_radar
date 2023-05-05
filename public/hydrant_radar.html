@@ -1,18 +1,13 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 	<base target="_top">
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-
-	<title>Quick Start - Leaflet</title>
-
+	<title>Hydrant Radar</title>
 	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
-
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin=""/>
 	<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
-
 	<style>
 		html, body {
 			height: 100%;
@@ -25,13 +20,8 @@
 			max-height: 100%;
 		}
 	</style>
-
-
 </head>
 <body>
-
-
-
 <div id="map" style="width: 95%; height: 100%;"></div>
 <script>
 	var currentPositionIcon = L.icon({
@@ -50,8 +40,24 @@
 	}).addTo(map);
 
 	var items = [];
-	const currentPositionMarker = L.marker(initialPosition, {title: 'foo'}).addTo(map).bindPopup('Unterflurhydrant 80');
+	const currentPositionMarker = L.marker(initialPosition, {title: 'Standort'}).addTo(map).bindPopup('Standort');
 	const distanceCircle = L.circle(initialPosition, {color: 'red', fillColor: '#f03', fillOpacity: 0.0, radius: 50}).addTo(map).bindPopup('50 m');
+
+	function addHydrant(item) {
+		var label = '';
+
+		switch(item.tags['fire_hydrant:type']) {
+			case 'underground':
+				label = 'Unterflurhydrant';
+				break;
+		}
+
+		if(item.tags['fire_hydrant:diameter']) {
+			label += ' ' + item.tags['fire_hydrant:diameter'] + ' mm'
+		}
+
+		L.marker([item.lat, item.lon], {title: 'label'}).addTo(map).bindPopup(label);
+	}
 
 	function updateItems() {
 		// Overpass turbo example
@@ -66,11 +72,18 @@
 		fetch('https://www.overpass-api.de/api/interpreter?data=[out:json];node["emergency"](49.800,10.155,49.808,10.168);out%20meta;')
 				.then(response => response.json())
 				.then(response =>
-						console.log(response.elements)
+						response.elements.forEach((item, index) => {
+							console.log(item);
+							switch(item.tags['emergency']) {
+								case 'fire_hydrant':
+									addHydrant(item);
+									break;
+								default:
+									console.log(item.tags['emergency']);
+							}
+
+						})
 				)
-
-		// add new items from Overpass turbo data
-
 	}
 
 	function success(pos) {
@@ -89,8 +102,5 @@
 
 	navigator.geolocation.watchPosition(success, error);
 </script>
-
-
-
 </body>
 </html>
