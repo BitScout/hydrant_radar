@@ -2,6 +2,8 @@
 
 A map of nearby fire hydrants and other stuff
 
+![](doc/images/screenshot.jpg)
+
 ## Intent
 
 * Simple website that shows firefighting equipment nearby (GPS based).
