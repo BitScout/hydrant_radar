@@ -33,37 +33,58 @@
 
 	var hydrantRedIcon = L.icon({
 		iconUrl: 'icon_hydrant_red.png',
-		iconSize: [64, 64],
-		iconAnchor: [32, 32],
+		iconSize: [32, 32],
+		iconAnchor: [16, 16],
 		popupAnchor: [0, 0],
 	});
 
 	var hydrantRedUndergroundIcon = L.icon({
 		iconUrl: 'icon_hydrant_red_underground.png',
-		iconSize: [64, 64],
-		iconAnchor: [32, 32],
+		iconSize: [32, 32],
+		iconAnchor: [16, 16],
 		popupAnchor: [0, -32],
 	});
 
 	var hydrantRedPillarIcon = L.icon({
 		iconUrl: 'icon_hydrant_red_pillar.png',
-		iconSize: [64, 64],
-		iconAnchor: [32, 32],
+		iconSize: [32, 32],
+		iconAnchor: [16, 16],
 		popupAnchor: [0, -32],
+	});
+
+	var hydrantBlueIcon = L.icon({
+		iconUrl: 'icon_hydrant_blue.png',
+		iconSize: [32, 32],
+		iconAnchor: [16, 16],
+		popupAnchor: [0, 0],
 	});
 
 	var hydrantBlueUndergroundIcon = L.icon({
 		iconUrl: 'icon_hydrant_blue_underground.png',
-		iconSize: [64, 64],
-		iconAnchor: [32, 32],
+		iconSize: [32, 32],
+		iconAnchor: [16, 16],
 		popupAnchor: [0, -32],
 	});
 
 	var hydrantBluePillarIcon = L.icon({
 		iconUrl: 'icon_hydrant_blue_pillar.png',
-		iconSize: [64, 64],
-		iconAnchor: [32, 32],
+		iconSize: [32, 32],
+		iconAnchor: [16, 16],
 		popupAnchor: [0, -32],
+	});
+
+	var waterTankIcon = L.icon({
+		iconUrl: 'icon_water_tank.png',
+		iconSize: [32, 32],
+		iconAnchor: [16, 16],
+		popupAnchor: [0, 0],
+	});
+
+	var keyDepotIcon = L.icon({
+		iconUrl: 'icon_key_depot.png',
+		iconSize: [32, 32],
+		iconAnchor: [16, 16],
+		popupAnchor: [0, 0],
 	});
 
 	const initialPosition = [49.8022, 10.1603];
@@ -85,6 +106,8 @@
 		var label = '';
 		var itemIcon = hydrantRedIcon;
 		const blueWaterSources = ['powered_pump'];
+
+		if(item.tags['colour'] == 'blue' || blueWaterSources.includes(item.tags['water_source'])){itemIcon = hydrantBlueIcon;}
 
 		switch(item.tags['fire_hydrant:type']) {
 			case 'underground':
@@ -117,6 +140,16 @@
 		L.marker([item.lat, item.lon], {title: 'label', icon: itemIcon}).addTo(map).bindPopup(label);
 	}
 
+	function addWaterTank(item) {
+		var label = 'Löschwassertank';
+		L.marker([item.lat, item.lon], {title: 'label', icon: waterTankIcon}).addTo(map).bindPopup(label);
+	}
+
+	function addKeyDepot(item) {
+		var label = 'Schlüsseldepot';
+		L.marker([item.lat, item.lon], {title: 'label', icon: keyDepotIcon}).addTo(map).bindPopup(label);
+	}
+
 	function updateItems(lat, lon) {
 		lastUpdatedPosition = [lat, lon];
 		//console.log('UPDATING for '+lat+' / '+lon);
@@ -135,6 +168,12 @@
 							switch(item.tags['emergency']) {
 								case 'fire_hydrant':
 									addHydrant(item);
+									break;
+								case 'water_tank':
+									addWaterTank(item);
+									break;
+								case 'key_depot':
+									addKeyDepot(item);
 									break;
 								default:
 									//console.log(item.tags['emergency']);
