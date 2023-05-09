@@ -15,15 +15,19 @@
 		}
 		.leaflet-container {
 			height: 100%;
-			width: 95%;
-			max-width: 95%;
+			width: 100%;
+			max-width: 100%;
 			max-height: 100%;
 		}
 	</style>
 </head>
 <body>
-<div id="map" style="width: 95%; height: 100%;"></div>
+<div id="map" style="width: 100%; height: 100%;"></div>
+<!-- <div id="gpsToggleButton" style="width: 4em; height: 1.1em; position:fixed; right: 10px; top: 10px; z-index:1000; background-color:lightblue; text-align: center; padding: .1em; role=button;">GPS an</div> -->
+<div id="debugDiv" style="width: 30em; height: 5.2em; position:fixed; left: 10px; bottom: 10px; z-index:-1000; background-color:lightblue; padding: .1em; role=button;"></div>
 <script>
+	var gpsEnabled = true;
+
 	const currentPositionIcon = L.icon({
 		iconUrl: 'current_position.png',
 		iconSize: [38, 95],
@@ -88,7 +92,7 @@
 	});
 
 	const initialPosition = [49.8022, 10.1603];
-	var lastUpdatedPosition = null;
+	var lastUpdatedPosition = [0,0];
 	const map = L.map('map').setView(initialPosition, 19);
 	const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 		maxZoom: 19,
@@ -151,7 +155,7 @@
 			}
 		}
 
-		L.marker([item.lat, item.lon], {title: 'label', icon: itemIcon}).addTo(map).bindPopup(label);
+		L.marker([item.lat, item.lon], {icon: itemIcon}).addTo(map).bindPopup(label);
 	}
 
 	function addWaterTank(item) {
@@ -171,7 +175,7 @@
 		// Remove existing hydrants etc from map
 		items.forEach((item, index) => {item.removeFrom(map);});
 
-		// Request Overpass turbo data
+		// Request Overpass API data
 		const latLonRange = 0.01;
 		fetch('https://www.overpass-api.de/api/interpreter?data=[out:json];node["emergency"]('+(lat-latLonRange/2)+','+(lon-latLonRange)+','+(lat+latLonRange/2)+','+(lon+latLonRange)+');out%20meta;')
 				.then(response => response.json())
@@ -198,26 +202,35 @@
 
 	function positionChanged(pos) {
 		const crd = pos.coords;
-		//console.log(crd);
 
+		// Update view
 		currentPositionMarker.setLatLng([crd.latitude, crd.longitude]);
 		distanceCircles.forEach((item, index) => {item.setLatLng([crd.latitude, crd.longitude]);});
 		map.setView([crd.latitude, crd.longitude]);
 
+		// Decide if we moved enough to justify querying the Overpass API
 		const movementLimit = 0.003;
-		if(lastUpdatedPosition != null && (Math.abs(lastUpdatedPosition[0]-crd.latitude) < movementLimit || Math.abs(lastUpdatedPosition[1]-crd.longitude) < movementLimit)) {
-			//console.log('skipping request because '+Math.abs(lastUpdatedPosition[0]-crd.latitude)+' / '+Math.abs(lastUpdatedPosition[1]-crd.longitude));
-			return;
-		}
+		minorChange = ((Math.abs(lastUpdatedPosition[0]-crd.latitude) < movementLimit) && (Math.abs(lastUpdatedPosition[1]-crd.longitude) < movementLimit));
 
-		updateItems(crd.latitude, crd.longitude);
+		if (!minorChange) {
+			updateItems(crd.latitude, crd.longitude);
+		}
 	}
 
 	function positionError(err) {
 		console.error(`ERROR(${err.code}): ${err.message}`);
 	}
 
-	navigator.geolocation.watchPosition(positionChanged, positionError);
+	function startup() {
+		navigator.geolocation.watchPosition(positionChanged, positionError);
+
+		/*gpsToggleButton = document.getElementById("gpsToggleButton");
+		gpsToggleButton.click(function(event){
+			console.log("click gps");
+		});*/
+	}
+
+	window.onload = startup;
 </script>
 </body>
 </html>

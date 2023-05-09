@@ -17,7 +17,7 @@ A map of nearby fire hydrants and other stuff
 
 ## Future development
 
-* Add more POI types (water tanks, keys)
+* Add Swimming pools with estimated surface
+* Add toggle to stop GPS updates, pulling POIs for the current view instead of the GPS position
 * Make circles configurable
 * Show hazards like CO2 fire suppression systems
-* Add toggle to stop GPS updates, pulling POIs for the current view instead of the GPS position
