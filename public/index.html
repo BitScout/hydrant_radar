@@ -25,6 +25,9 @@
 <div id="map" style="width: 100%; height: 100%;"></div>
 <!-- <div id="gpsToggleButton" style="width: 4em; height: 1.1em; position:fixed; right: 10px; top: 10px; z-index:1000; background-color:lightblue; text-align: center; padding: .1em; role=button;">GPS an</div> -->
 <div id="debugDiv" style="width: 30em; height: 5.2em; position:fixed; left: 10px; bottom: 10px; z-index:-1000; background-color:lightblue; padding: .1em; role=button;"></div>
+<div id="aboutDiv" style="width: 3.5em; height: 1.1em; position:fixed; left: 0; bottom: 0; z-index:1001; font-size: .75em; background-color:white; padding: .2em; text-align: center;">
+	<a href="https://github.com/BitScout/hydrant_radar" target="_blank">GitHub</a>
+</div>
 <script>
 	var gpsEnabled = true;
 
@@ -103,10 +106,14 @@
 	var items = [];
 	const currentPositionMarker = L.marker(initialPosition).addTo(map);
 	const distanceCircles = [
-		L.circle(initialPosition, {color: 'red', fillOpacity: 0.0, radius: 20}).addTo(map),
-		L.circle(initialPosition, {color: '#FF8888', fillOpacity: 0.0, radius: 40}).addTo(map),
-		L.circle(initialPosition, {color: '#FF8888', fillOpacity: 0.0, radius: 100}).addTo(map),
-		L.circle(initialPosition, {color: '#FF8888', fillOpacity: 0.0, radius: 500}).addTo(map)
+		L.circle(initialPosition, {color: '#dcff1e', fillOpacity: 0.0, radius: 20}).addTo(map), // 1x B
+		L.circle(initialPosition, {color: '#dcff1e', fillOpacity: 0.0, radius: 40}).addTo(map), // 2x B
+		L.circle(initialPosition, {color: '#dcff1e', fillOpacity: 0.0, radius: 60}).addTo(map), // 3x B
+		L.circle(initialPosition, {color: '#dcff1e', fillOpacity: 0.0, radius: 80}).addTo(map), // 4x B
+		L.circle(initialPosition, {color: 'red', fillOpacity: 0.0, radius: 100}).addTo(map), // 5x B = 1x caddy
+		L.circle(initialPosition, {color: 'red', fillOpacity: 0.0, radius: 200}).addTo(map), // 10x B = 2x caddy
+		L.circle(initialPosition, {color: 'grey', fillOpacity: 0.0, radius: 500}).addTo(map), // 50x B = 1x container
+		L.circle(initialPosition, {color: 'grey', fillOpacity: 0.0, radius: 1000}).addTo(map) // 100x B = 2x container
 	];
 
 	function addHydrant(item) {
