@@ -25,70 +25,71 @@
 <div id="map" style="width: 100%; height: 100%;"></div>
 <!-- <div id="gpsToggleButton" style="width: 4em; height: 1.1em; position:fixed; right: 10px; top: 10px; z-index:1000; background-color:lightblue; text-align: center; padding: .1em; role=button;">GPS an</div> -->
 <div id="debugDiv" style="width: 30em; height: 5.2em; position:fixed; left: 10px; bottom: 10px; z-index:-1000; background-color:lightblue; padding: .1em; role=button;"></div>
-<div id="aboutDiv" style="width: 3.5em; height: 1.1em; position:fixed; left: 0; bottom: 0; z-index:1001; font-size: .75em; background-color:white; padding: .2em; text-align: center;">
+<div id="aboutDiv" style="width: 10em; height: 1.1em; position:fixed; left: 0; bottom: 0; z-index:1001; font-size: .75em; background-color:white; padding: .2em; text-align: center;">
+	<a href="https://www.feuerwehr-dettelbach.de/" target="_blank">FF Dettelbach</a> |
 	<a href="https://github.com/BitScout/hydrant_radar" target="_blank">GitHub</a>
 </div>
 <script>
 	var gpsEnabled = true;
 
 	const currentPositionIcon = L.icon({
-		iconUrl: 'current_position.png',
+		iconUrl: 'icons/current_position.png',
 		iconSize: [38, 95],
 		iconAnchor: [22, 94],
 		popupAnchor: [-3, -76],
 	});
 
 	var hydrantRedIcon = L.icon({
-		iconUrl: 'icon_hydrant_red.png',
+		iconUrl: 'icons/icon_hydrant_red.png',
 		iconSize: [32, 32],
 		iconAnchor: [16, 16],
 		popupAnchor: [0, 0],
 	});
 
 	var hydrantRedUndergroundIcon = L.icon({
-		iconUrl: 'icon_hydrant_red_underground.png',
+		iconUrl: 'icons/icon_hydrant_red_underground.png',
 		iconSize: [32, 32],
 		iconAnchor: [16, 16],
 		popupAnchor: [0, -32],
 	});
 
 	var hydrantRedPillarIcon = L.icon({
-		iconUrl: 'icon_hydrant_red_pillar.png',
+		iconUrl: 'icons/icon_hydrant_red_pillar.png',
 		iconSize: [32, 32],
 		iconAnchor: [16, 16],
 		popupAnchor: [0, -32],
 	});
 
 	var hydrantBlueIcon = L.icon({
-		iconUrl: 'icon_hydrant_blue.png',
+		iconUrl: 'icons/icon_hydrant_blue.png',
 		iconSize: [32, 32],
 		iconAnchor: [16, 16],
 		popupAnchor: [0, 0],
 	});
 
 	var hydrantBlueUndergroundIcon = L.icon({
-		iconUrl: 'icon_hydrant_blue_underground.png',
+		iconUrl: 'icons/icon_hydrant_blue_underground.png',
 		iconSize: [32, 32],
 		iconAnchor: [16, 16],
 		popupAnchor: [0, -32],
 	});
 
 	var hydrantBluePillarIcon = L.icon({
-		iconUrl: 'icon_hydrant_blue_pillar.png',
+		iconUrl: 'icons/icon_hydrant_blue_pillar.png',
 		iconSize: [32, 32],
 		iconAnchor: [16, 16],
 		popupAnchor: [0, -32],
 	});
 
 	var waterTankIcon = L.icon({
-		iconUrl: 'icon_water_tank.png',
+		iconUrl: 'icons/icon_water_tank.png',
 		iconSize: [32, 32],
 		iconAnchor: [16, 16],
 		popupAnchor: [0, 0],
 	});
 
 	var keyDepotIcon = L.icon({
-		iconUrl: 'icon_key_depot.png',
+		iconUrl: 'icons/icon_key_depot.png',
 		iconSize: [32, 32],
 		iconAnchor: [16, 16],
 		popupAnchor: [0, 0],
@@ -99,7 +100,7 @@
 	const map = L.map('map').setView(initialPosition, 19);
 	const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 		maxZoom: 19,
-		minZoom: 17,
+		minZoom: 16,
 		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 	}).addTo(map);
 
@@ -183,7 +184,7 @@
 		items.forEach((item, index) => {item.removeFrom(map);});
 
 		// Request Overpass API data
-		const latLonRange = 0.01;
+		const latLonRange = 0.02;
 		fetch('https://www.overpass-api.de/api/interpreter?data=[out:json];node["emergency"]('+(lat-latLonRange/2)+','+(lon-latLonRange)+','+(lat+latLonRange/2)+','+(lon+latLonRange)+');out%20meta;')
 				.then(response => response.json())
 				.then(response =>
@@ -216,7 +217,7 @@
 		map.setView([crd.latitude, crd.longitude]);
 
 		// Decide if we moved enough to justify querying the Overpass API
-		const movementLimit = 0.003;
+		const movementLimit = 0.007;
 		minorChange = ((Math.abs(lastUpdatedPosition[0]-crd.latitude) < movementLimit) && (Math.abs(lastUpdatedPosition[1]-crd.longitude) < movementLimit));
 
 		if (!minorChange) {
