@@ -32,13 +32,6 @@
 <script>
 	var gpsEnabled = true;
 
-	const currentPositionIcon = L.icon({
-		iconUrl: 'icons/current_position.png',
-		iconSize: [38, 95],
-		iconAnchor: [22, 94],
-		popupAnchor: [-3, -76],
-	});
-
 	var hydrantRedIcon = L.icon({
 		iconUrl: 'icons/icon_hydrant_red.png',
 		iconSize: [32, 32],
@@ -149,15 +142,21 @@
 				case 'sidewalk':
 					label += '<br>Gehsteig';
 					break;
+				case 'green':
+					label += '<br>Grünfläche';
+					break;
 			}
 		}
 
 		if(item.tags['water_source']) {
 			switch(item.tags['water_source']) {
 				case 'main':
+				case 'water_works':
+				case 'tap':
+				case undefined:
 					label += '<br>Trinkwassernetz';
 					break;
-				case 'powered_pump':
+				default:
 					label += '<br>Löschwassernetz';
 					break;
 			}
@@ -185,7 +184,8 @@
 
 		// Request Overpass API data
 		const latLonRange = 0.02;
-		fetch('https://www.overpass-api.de/api/interpreter?data=[out:json];node["emergency"]('+(lat-latLonRange/2)+','+(lon-latLonRange)+','+(lat+latLonRange/2)+','+(lon+latLonRange)+');out%20meta;')
+		var latLonFromTo = (lat-latLonRange/2)+','+(lon-latLonRange)+','+(lat+latLonRange/2)+','+(lon+latLonRange);
+		fetch('https://www.overpass-api.de/api/interpreter?data=[out:json][timeout:25];(node["emergency"]('+latLonFromTo+'););out%20meta;')
 				.then(response => response.json())
 				.then(response =>
 						response.elements.forEach((item, index) => {
