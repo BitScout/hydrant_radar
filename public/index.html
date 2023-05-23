@@ -30,6 +30,10 @@
 	<a href="https://github.com/BitScout/hydrant_radar" target="_blank">GitHub</a>
 </div>
 <script>
+	if (location.protocol !== 'https:') {
+		location.replace(`https:${location.href.substring(location.protocol.length)}`);
+	}
+	
 	var gpsEnabled = true;
 
 	var hydrantRedIcon = L.icon({
