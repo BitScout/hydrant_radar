@@ -1,11 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
 	<base target="_top">
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Hydrant Radar</title>
-	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+	
+	<!-- Primary Meta Tags -->
+	<meta name="title" content="Hydrant Radar">
+	<meta name="description" content="Die nähesten Feuerwehrhydranten, sofort!">
+
+	<!-- Open Graph / Facebook -->
+	<meta property="og:type" content="website">
+	<meta property="og:title" content="Hydrant Radar">
+	<meta property="og:description" content="Die nähesten Feuerwehrhydranten, sofort!">
+	<meta property="og:image" content="https://final-url/preview.png">
+
+	<!-- Twitter -->
+	<meta property="twitter:card" content="summary_large_image">
+	<meta property="twitter:title" content="Hydrant Radar">
+	<meta property="twitter:description" content="Die nähesten Feuerwehrhydranten, sofort!">
+	<meta property="twitter:image" content="https://final-url/preview.png">
+	
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin=""/>
 	<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
 	<style>
@@ -97,7 +114,7 @@
 	const map = L.map('map').setView(initialPosition, 19);
 	const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 		maxZoom: 19,
-		minZoom: 16,
+		minZoom: 15,
 		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 	}).addTo(map);
 
@@ -199,26 +216,26 @@
 		const latLonRange = 0.04;
 		var latLonFromTo = (lat-latLonRange/2)+','+(lon-latLonRange)+','+(lat+latLonRange/2)+','+(lon+latLonRange);
 		fetch('https://www.overpass-api.de/api/interpreter?data=[out:json][timeout:25];(node["emergency"]('+latLonFromTo+'););out%20meta;')
-				.then(response => response.json())
-				.then(response =>
-						response.elements.forEach((item, index) => {
-							//console.log(item);
-
-							switch(item.tags['emergency']) {
-								case 'fire_hydrant':
-									addHydrant(item);
-									break;
-								case 'water_tank':
-									addWaterTank(item);
-									break;
-								case 'key_depot':
-									addKeyDepot(item);
-									break;
-								default:
-									//console.log(item.tags['emergency']);
-							}
-						})
-				)
+		.then(response => response.json())
+		.then(response => 
+			response.elements.forEach((item, index) => {
+				//console.log(item);
+				
+				switch(item.tags['emergency']) {
+					case 'fire_hydrant':
+						addHydrant(item);
+						break;
+					case 'water_tank':
+						addWaterTank(item);
+						break;
+					case 'key_depot':
+						addKeyDepot(item);
+						break;
+					default:
+						//console.log(item.tags['emergency']);
+				}
+			})
+		)
 	}
 
 	function positionChanged(pos) {
