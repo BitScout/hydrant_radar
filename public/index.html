@@ -6,7 +6,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Hydrant Radar</title>
 	<link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
-	
+
 	<!-- Primary Meta Tags -->
 	<meta name="title" content="Hydrant Radar">
 	<meta name="description" content="Die nähesten Feuerwehrhydranten, sofort!">
@@ -22,7 +22,7 @@
 	<meta property="twitter:title" content="Hydrant Radar">
 	<meta property="twitter:description" content="Die nähesten Feuerwehrhydranten, sofort!">
 	<meta property="twitter:image" content="https://final-url/preview.png">
-	
+
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin=""/>
 	<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
 	<style>
@@ -50,64 +50,32 @@
 	if (location.protocol !== 'https:') {
 		location.replace(`https:${location.href.substring(location.protocol.length)}`);
 	}
-	
+
 	var gpsEnabled = true;
 
-	var hydrantRedIcon = L.icon({
-		iconUrl: 'icons/icon_hydrant_red.png',
-		iconSize: [32, 32],
-		iconAnchor: [16, 16],
-		popupAnchor: [0, 0],
+	var iconDefinitions = [
+		'icon_hydrant_red',
+		'icon_hydrant_red_underground',
+		'icon_hydrant_red_pillar',
+		'icon_hydrant_blue',
+		'icon_hydrant_blue_underground',
+		'icon_hydrant_blue_pillar',
+		'icon_water_tank',
+		'icon_key_depot',
+	];
+	var icons = [];
+
+	iconDefinitions.forEach((item, index) => {
+		newIcon = L.icon({
+			iconUrl: 'icons/'+item+'.png',
+			iconSize: [32, 32],
+			iconAnchor: [16, 16],
+			popupAnchor: [0, 0],
+		});
+		icons[item] = newIcon;
 	});
 
-	var hydrantRedUndergroundIcon = L.icon({
-		iconUrl: 'icons/icon_hydrant_red_underground.png',
-		iconSize: [32, 32],
-		iconAnchor: [16, 16],
-		popupAnchor: [0, -32],
-	});
-
-	var hydrantRedPillarIcon = L.icon({
-		iconUrl: 'icons/icon_hydrant_red_pillar.png',
-		iconSize: [32, 32],
-		iconAnchor: [16, 16],
-		popupAnchor: [0, -32],
-	});
-
-	var hydrantBlueIcon = L.icon({
-		iconUrl: 'icons/icon_hydrant_blue.png',
-		iconSize: [32, 32],
-		iconAnchor: [16, 16],
-		popupAnchor: [0, 0],
-	});
-
-	var hydrantBlueUndergroundIcon = L.icon({
-		iconUrl: 'icons/icon_hydrant_blue_underground.png',
-		iconSize: [32, 32],
-		iconAnchor: [16, 16],
-		popupAnchor: [0, -32],
-	});
-
-	var hydrantBluePillarIcon = L.icon({
-		iconUrl: 'icons/icon_hydrant_blue_pillar.png',
-		iconSize: [32, 32],
-		iconAnchor: [16, 16],
-		popupAnchor: [0, -32],
-	});
-
-	var waterTankIcon = L.icon({
-		iconUrl: 'icons/icon_water_tank.png',
-		iconSize: [32, 32],
-		iconAnchor: [16, 16],
-		popupAnchor: [0, 0],
-	});
-
-	var keyDepotIcon = L.icon({
-		iconUrl: 'icons/icon_key_depot.png',
-		iconSize: [32, 32],
-		iconAnchor: [16, 16],
-		popupAnchor: [0, 0],
-	});
+	console.log(icons);
 
 	const initialPosition = [49.8022, 10.1603];
 	var lastUpdatedPosition = [0,0];
@@ -133,21 +101,21 @@
 
 	function addHydrant(item) {
 		var label = '';
-		var itemIcon = hydrantRedIcon;
+		var itemIcon = icons['icon_hydrant_red'];
 		const blueWaterSources = ['powered_pump'];
 
-		if(item.tags['colour'] == 'blue' || blueWaterSources.includes(item.tags['water_source'])){itemIcon = hydrantBlueIcon;}
+		if(item.tags['colour'] == 'blue' || blueWaterSources.includes(item.tags['water_source'])){itemIcon = icons['icon_hydrant_blue'];}
 
 		switch(item.tags['fire_hydrant:type']) {
 			case 'underground':
 				label = 'Unterflurhydrant';
-				itemIcon = hydrantRedUndergroundIcon;
-				if(item.tags['colour'] == 'blue' || blueWaterSources.includes(item.tags['water_source'])){itemIcon = hydrantBlueUndergroundIcon;}
+				itemIcon = icons['icon_hydrant_red_underground'];
+				if(item.tags['colour'] == 'blue' || blueWaterSources.includes(item.tags['water_source'])){itemIcon = icons['icon_hydrant_blue_underground'];}
 				break;
 			case 'pillar':
 				label = 'Überflurhydrant';
-				itemIcon = hydrantRedPillarIcon;
-				if(item.tags['colour'] == 'blue' || blueWaterSources.includes(item.tags['water_source'])){itemIcon = hydrantBluePillarIcon;}
+				itemIcon = icons['icon_hydrant_red_pillar'];
+				if(item.tags['colour'] == 'blue' || blueWaterSources.includes(item.tags['water_source'])){itemIcon = icons['icon_hydrant_blue_pillar'];}
 				break;
 		}
 
@@ -156,7 +124,7 @@
 		} else if(item.tags['diameter']) {
 			label += ' ' + item.tags['diameter'] + ' mm'
 		}
-		
+
 		if(item.tags['couplings'] && item.tags['couplings'] > 1) {
 			label += ' mit ' + item.tags['couplings'] + ' Kupplungen'
 		}
@@ -197,12 +165,12 @@
 
 	function addWaterTank(item) {
 		var label = 'Löschwassertank';
-		L.marker([item.lat, item.lon], {title: 'label', icon: waterTankIcon}).addTo(map).bindPopup(label);
+		L.marker([item.lat, item.lon], {title: 'label', icon: icons['icon_water_tank']}).addTo(map).bindPopup(label);
 	}
 
 	function addKeyDepot(item) {
 		var label = 'Schlüsseldepot';
-		L.marker([item.lat, item.lon], {title: 'label', icon: keyDepotIcon}).addTo(map).bindPopup(label);
+		L.marker([item.lat, item.lon], {title: 'label', icon: icons['icon_key_depot']}).addTo(map).bindPopup(label);
 	}
 
 	function updateItems(lat, lon) {
@@ -217,10 +185,10 @@
 		var latLonFromTo = (lat-latLonRange/2)+','+(lon-latLonRange)+','+(lat+latLonRange/2)+','+(lon+latLonRange);
 		fetch('https://www.overpass-api.de/api/interpreter?data=[out:json][timeout:25];(node["emergency"]('+latLonFromTo+'););out%20meta;')
 		.then(response => response.json())
-		.then(response => 
+		.then(response =>
 			response.elements.forEach((item, index) => {
 				//console.log(item);
-				
+
 				switch(item.tags['emergency']) {
 					case 'fire_hydrant':
 						addHydrant(item);
