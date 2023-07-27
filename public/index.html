@@ -40,8 +40,7 @@
 </head>
 <body>
 <div id="map" style="width: 100%; height: 100%;"></div>
-<!-- <div id="gpsToggleButton" style="width: 4em; height: 1.1em; position:fixed; right: 10px; top: 10px; z-index:1000; background-color:lightblue; text-align: center; padding: .1em; role=button;">GPS an</div> -->
-<div id="debugDiv" style="width: 30em; height: 5.2em; position:fixed; left: 10px; bottom: 10px; z-index:-1000; background-color:lightblue; padding: .1em; role=button;"></div>
+<div id="gpsToggleButton" style="width: 3em; height: 1.1em; position:fixed; right: 10px; top: 10px; z-index:-1000; color:white; background-color:black; text-align: center; padding: .1em;" role="button">GPS</div>
 <div id="aboutDiv" style="min-width: 10.5em; max-width: 12.5em; height: 1.1em; position:fixed; left: 0; bottom: 0; z-index:1001; font-size: .75em; background-color:white; padding: .2em; text-align: center;">
 	<a href="https://www.feuerwehr-dettelbach.de/" target="_blank">FF Dettelbach</a> |
 	<a href="https://github.com/BitScout/hydrant_radar" target="_blank">GitHub</a>
@@ -75,8 +74,6 @@
 		icons[item] = newIcon;
 	});
 
-	console.log(icons);
-
 	const initialPosition = [49.8022, 10.1603];
 	var lastUpdatedPosition = [0,0];
 	const map = L.map('map').setView(initialPosition, 19);
@@ -92,7 +89,7 @@
 		L.circle(initialPosition, {color: 'grey', fillOpacity: 0.0, radius: 20}).addTo(map), // 1x B
 		L.circle(initialPosition, {color: 'grey', fillOpacity: 0.0, radius: 40}).addTo(map), // 2x B
 		L.circle(initialPosition, {color: 'grey', fillOpacity: 0.0, radius: 60}).addTo(map), // 3x B
-		L.circle(initialPosition, {color: 'grey', fillOpacity: 0.0, radius: 80}).addTo(map), // 4x B
+		//L.circle(initialPosition, {color: 'grey', fillOpacity: 0.0, radius: 80}).addTo(map), // 4x B
 		L.circle(initialPosition, {color: 'red', fillOpacity: 0.0, radius: 100}).addTo(map), // 5x B = 1x caddy
 		L.circle(initialPosition, {color: 'red', fillOpacity: 0.0, radius: 200}).addTo(map), // 10x B = 2x caddy
 		L.circle(initialPosition, {color: 'black', fillOpacity: 0.0, radius: 500}).addTo(map), // 50x B = 1x container
@@ -230,10 +227,12 @@
 	function startup() {
 		navigator.geolocation.watchPosition(positionChanged, positionError);
 
-		/*gpsToggleButton = document.getElementById("gpsToggleButton");
-		gpsToggleButton.click(function(event){
-			console.log("click gps");
-		});*/
+		gpsToggleButton = document.getElementById("gpsToggleButton");
+		gpsToggleButton.addEventListener('click', function (event) {
+			gpsEnabled = !gpsEnabled;
+			gpsToggleButton.style.backgroundColor = gpsEnabled ? 'black' : 'white';
+			gpsToggleButton.style.color = gpsEnabled ? 'white' : 'black';
+		});
 	}
 
 	window.onload = startup;
