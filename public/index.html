@@ -157,6 +157,10 @@
 			}
 		}
 
+		if (label == '') {
+			label = '[keine Informationen]';
+		}
+
 		L.marker([item.lat, item.lon], {icon: itemIcon}).addTo(map).bindPopup(label);
 	}
 
