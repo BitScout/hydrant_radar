@@ -6,8 +6,11 @@ A map of nearby fire hydrants and other stuff
 
 ## Intent
 
-* Simple website that shows firefighting equipment nearby (GPS based).
-* No scrolling away, GPS always wins, but you can zoom out.
+* Simple website that shows firefighting equipment nearby.
+* By default, GPS tracking is enabled, giving you a virtual radar view
+with variable zoom.
+* You can disable GPS tracking using the button in the top right corner,
+allowing you to pan and zoom to your target in advance.
 * Made from a German perspective, but meant to work worldwide, even if symbols or units (mm) don't match for now.
 
 ## Technology
