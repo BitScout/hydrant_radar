@@ -40,7 +40,7 @@
 </head>
 <body>
 <div id="map" style="width: 100%; height: 100%;"></div>
-<div id="gpsToggleButton" style="width: 3em; height: 1.1em; position:fixed; right: 10px; top: 10px; z-index:-1000; color:white; background-color:black; text-align: center; padding: .1em;" role="button">GPS</div>
+<div id="gpsToggleButton" style="width: 3em; height: 1.1em; position:fixed; right: 10px; top: 10px; z-index:1000; color:white; background-color:black; text-align: center; padding: .1em;" role="button">GPS</div>
 <div id="aboutDiv" style="min-width: 10.5em; max-width: 12.5em; height: 1.1em; position:fixed; left: 0; bottom: 0; z-index:1001; font-size: .75em; background-color:white; padding: .2em; text-align: center;">
 	<a href="https://www.feuerwehr-dettelbach.de/" target="_blank">FF Dettelbach</a> |
 	<a href="https://github.com/BitScout/hydrant_radar" target="_blank">GitHub</a>
@@ -66,7 +66,7 @@
 
 	iconDefinitions.forEach((item, index) => {
 		newIcon = L.icon({
-			iconUrl: 'icons/'+item+'.png',
+			iconUrl: 'images/'+item+'.png',
 			iconSize: [32, 32],
 			iconAnchor: [16, 16],
 			popupAnchor: [0, 0],
@@ -207,20 +207,38 @@
 		)
 	}
 
-	function positionChanged(pos) {
-		const crd = pos.coords;
+	function mapMoved() {
+		if(gpsEnabled) {
+			return;
+		}
 
-		// Update view
-		currentPositionMarker.setLatLng([crd.latitude, crd.longitude]);
-		distanceCircles.forEach((item, index) => {item.setLatLng([crd.latitude, crd.longitude]);});
-		map.setView([crd.latitude, crd.longitude]);
+		var currentPos = map.getCenter();
+		updateView(currentPos.lat, currentPos.lng, false)
+	}
+
+	function gpsPositionChanged(pos) {
+		if(!gpsEnabled) {
+			return;
+		}
+
+		const crd = pos.coords;
+		updateView(crd.latitude, crd.longitude, true)
+	}
+
+	function updateView(lat, lon, setView) {
+		currentPositionMarker.setLatLng([lat, lon]);
+		distanceCircles.forEach((item, index) => {item.setLatLng([lat, lon]);});
+
+		if(setView) {
+			map.setView([lat, lon]);
+		}
 
 		// Decide if we moved enough to justify querying the Overpass API
 		const movementLimit = 0.015;
-		minorChange = ((Math.abs(lastUpdatedPosition[0]-crd.latitude) < movementLimit) && (Math.abs(lastUpdatedPosition[1]-crd.longitude) < movementLimit));
+		minorChange = ((Math.abs(lastUpdatedPosition[0]-lat) < movementLimit) && (Math.abs(lastUpdatedPosition[1]-lon) < movementLimit));
 
 		if (!minorChange) {
-			updateItems(crd.latitude, crd.longitude);
+			updateItems(lat, lon);
 		}
 	}
 
@@ -229,7 +247,8 @@
 	}
 
 	function startup() {
-		navigator.geolocation.watchPosition(positionChanged, positionError);
+		navigator.geolocation.watchPosition(gpsPositionChanged, positionError);
+		map.on("moveend", mapMoved);
 
 		gpsToggleButton = document.getElementById("gpsToggleButton");
 		gpsToggleButton.addEventListener('click', function (event) {
