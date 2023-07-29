@@ -157,6 +157,10 @@
 			}
 		}
 
+		if(item.tags['ref']) {
+			label += '<br>Referenznummer ' + item.tags['ref'];
+		}
+
 		if (label == '') {
 			label = '[keine Informationen]';
 		}
