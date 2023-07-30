@@ -225,13 +225,18 @@
 			return;
 		}
 
-		const crd = pos.coords;
-		updateView(crd.latitude, crd.longitude, true)
+		var mapPosition = pos.coords;
+		updateView(mapPosition.latitude, mapPosition.longitude, true)
+	}
+
+	function positionError(err) {
+		console.error(`ERROR(${err.code}): ${err.message}`);
 	}
 
 	function updateView(lat, lon, setView) {
 		currentPositionMarker.setLatLng([lat, lon]);
 		distanceCircles.forEach((item, index) => {item.setLatLng([lat, lon]);});
+		updateAnchor();
 
 		if(setView) {
 			map.setView([lat, lon]);
@@ -246,20 +251,42 @@
 		}
 	}
 
-	function positionError(err) {
-		console.error(`ERROR(${err.code}): ${err.message}`);
+	function updateAnchor() {
+		var mapPosition = map.getCenter();
+		history.replaceState(undefined, undefined, "#"+Number(gpsEnabled)+"/"+map.getZoom()+"/"+roundCoord(mapPosition.lat)+"/"+roundCoord(mapPosition.lng))
+	}
+
+	function roundCoord(input) {
+		return Math.round(input * 10000)/10000;
 	}
 
 	function startup() {
 		navigator.geolocation.watchPosition(gpsPositionChanged, positionError);
 		map.on("moveend", mapMoved);
 
+		var urlParts = document.URL.split('#');
+		var anchor = urlParts[1];
+
+		if (undefined != anchor) {
+			var anchorParts = anchor.split('/');
+
+			gpsEnabled = (anchorParts[0] == 1);
+			updateGpsButton();
+			map.setView([anchorParts[2], anchorParts[3]], anchorParts[1]);
+			updateView(Number(anchorParts[2]), Number(anchorParts[3]), false);
+		}
+
 		gpsToggleButton = document.getElementById("gpsToggleButton");
 		gpsToggleButton.addEventListener('click', function (event) {
 			gpsEnabled = !gpsEnabled;
-			gpsToggleButton.style.backgroundColor = gpsEnabled ? 'black' : 'white';
-			gpsToggleButton.style.color = gpsEnabled ? 'white' : 'black';
+			updateGpsButton();
+			updateAnchor();
 		});
+	}
+
+	function updateGpsButton() {
+		gpsToggleButton.style.backgroundColor = gpsEnabled ? 'black' : 'white';
+		gpsToggleButton.style.color = gpsEnabled ? 'white' : 'black';
 	}
 
 	window.onload = startup;
