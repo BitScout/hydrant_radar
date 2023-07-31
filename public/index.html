@@ -50,7 +50,9 @@
 		location.replace(`https:${location.href.substring(location.protocol.length)}`);
 	}
 
-	var gpsEnabled = true;
+	var gpsEnabled = true; // Default value, unless set in the URL anchor.
+	const latLonRange = 0.008; // Range (in degrees) for which hydrants are loaded.
+	const movementLimit = 0.003; // Should be about half to one third of latLonRange.
 
 	var iconDefinitions = [
 		'icon_hydrant_red',
@@ -191,7 +193,6 @@
 		items.forEach((item, index) => {item.removeFrom(map);});
 
 		// Request Overpass API data
-		const latLonRange = 0.04;
 		var latLonFromTo = (lat-latLonRange/2)+','+(lon-latLonRange)+','+(lat+latLonRange/2)+','+(lon+latLonRange);
 		fetch('https://www.overpass-api.de/api/interpreter?data=[out:json][timeout:25];(node["emergency"]('+latLonFromTo+'););out%20meta;')
 		.then(response => response.json())
@@ -249,8 +250,7 @@
 		}
 
 		// Decide if we moved enough to justify querying the Overpass API
-		const movementLimit = 0.015;
-		minorChange = ((Math.abs(lastUpdatedPosition[0]-lat) < movementLimit) && (Math.abs(lastUpdatedPosition[1]-lon) < movementLimit));
+		minorChange = ((Math.abs(lastUpdatedPosition[0]-lat) < movementLimit/2) && (Math.abs(lastUpdatedPosition[1]-lon) < movementLimit));
 
 		if (!minorChange) {
 			updateItems(lat, lon);
