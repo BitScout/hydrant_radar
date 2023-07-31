@@ -41,6 +41,7 @@
 <body>
 <div id="map" style="width: 100%; height: 100%;"></div>
 <div id="gpsToggleButton" style="width: 3em; height: 1.1em; position:fixed; right: 10px; top: 10px; z-index:1000; color:white; background-color:black; text-align: center; padding: .1em;" role="button">GPS</div>
+<div id="downloadCsvButton" style="width: 3em; height: 1.1em; position:fixed; right: 70px; top: 10px; z-index:1000; color:black; background-color:lightgrey; text-align: center; padding: .1em;" role="button">CSV</div>
 <div id="aboutDiv" style="min-width: 10.5em; max-width: 12.5em; height: 1.1em; position:fixed; left: 0; bottom: 0; z-index:1001; font-size: .75em; background-color:white; padding: .2em; text-align: center;">
 	<a href="https://www.feuerwehr-dettelbach.de/" target="_blank">FF Dettelbach</a> |
 	<a href="https://github.com/BitScout/hydrant_radar" target="_blank">GitHub</a>
@@ -51,8 +52,33 @@
 	}
 
 	var gpsEnabled = true; // Default value, unless set in the URL anchor.
-	const latLonRange = 0.008; // Range (in degrees) for which hydrants are loaded.
-	const movementLimit = 0.003; // Should be about half to one third of latLonRange.
+	const latLonRange = 0.02; // Range (in degrees) for which hydrants are loaded.
+	const movementLimit = 0.007; // Should be about half to one third of latLonRange.
+
+	const csvMapping = {
+		'emergency': {
+			'fire_hydrant': 'Hydrant',
+			'suction_point': 'Löschwasserentnahmestelle',
+			'water_tank': 'Löschwassertank',
+			'key_depot': 'Schlüsseldepot',
+		},
+		'type': {
+			'underground': 'Unterflurhydrant',
+			'pillar': 'Überflurhydrant',
+		},
+		'position': {
+			'lane': 'Straßenfläche',
+			'parking_lot': 'Parkplatz',
+			'sidewalk': 'Gehweg',
+			'green': 'Grünfläche',
+		},
+		'water_source': {
+			'main': 'Trinkwasser',
+			'water_works': 'Trinkwasser',
+			'tap': 'Trinkwasser',
+			'powered_pump': 'Löschwassernetz',
+		}
+	}
 
 	var iconDefinitions = [
 		'icon_hydrant_red',
@@ -288,11 +314,79 @@
 			updateGpsButton();
 			updateAnchor();
 		});
+
+		downloadCsvButton = document.getElementById("downloadCsvButton");
+		downloadCsvButton.addEventListener('click', function (event) {
+			generateCsv(';');
+		});
 	}
 
 	function updateGpsButton() {
 		gpsToggleButton.style.backgroundColor = gpsEnabled ? 'black' : 'white';
 		gpsToggleButton.style.color = gpsEnabled ? 'white' : 'black';
+	}
+
+	function generateCsv(separator) {
+		var csv = [];
+		csv.push(['Hydrantennummber', 'Basistyp', 'Hydrantentyp', 'Position', 'Durchmesser', 'Anschlüsse', 'Wasserquelle', 'Breitengrad', 'Längengrad', 'OSM-Link', 'Hinweise'].join(separator));
+
+		// Request Overpass API data
+		var bounds = map.getBounds();
+		var latLonFromTo = bounds.getSouth()+','+bounds.getWest()+','+bounds.getNorth()+','+bounds.getEast();
+		fetch('https://www.overpass-api.de/api/interpreter?data=[out:json][timeout:25];(node["emergency"]('+latLonFromTo+'););out%20meta;')
+			.then(response => response.json())
+			.then(response => {
+				var urlParts = document.URL.split('#');
+
+				response.elements.forEach((item, index) => {
+					if(!Object.keys(csvMapping['emergency']).includes(item.tags['emergency'])) {
+						return;
+					}
+
+					var notes = [];
+
+					if('fire_hydrant' == item.tags['emergency']) {
+						if(undefined == item.tags['fire_hydrant:diameter'] && 'underground' == item.tags['fire_hydrant:type']) {
+							notes.push('Durchmesser fehlt');
+						}
+						if(undefined == item.tags['fire_hydrant:type']) {
+							notes.push('Hydrantentyp fehlt');
+						}
+						if(undefined == item.tags['fire_hydrant:position']) {
+							notes.push('Position fehlt');
+						}
+					}
+
+					var row = [
+						item.tags['ref'],
+						csvMapping['emergency'][item.tags['emergency']],
+						csvMapping['type'][item.tags['fire_hydrant:type']] ?? item.tags['fire_hydrant:type'],
+						csvMapping['position'][item.tags['fire_hydrant:position']] ?? item.tags['fire_hydrant:position'],
+						item.tags['fire_hydrant:diameter'],
+						item.tags['couplings'],
+						csvMapping['water_source'][item.tags['water_source']] ?? item.tags['water_source'],
+						item.lat,
+						item.lon,
+						urlParts[0]+'#0/19/'+item.lat+'/'+item.lon,
+						notes.join(', ')
+					];
+					csv.push(row.join(separator));
+				});
+
+				downloadCsv(csv.join('\n'));
+			}
+			);
+
+		return csv.join('\n');
+	}
+
+	const downloadCsv = function (data) {
+		const blob = new Blob([data], { type: 'text/csv' });
+		const url = window.URL.createObjectURL(blob)
+		const a = document.createElement('a')
+		a.setAttribute('href', url)
+		a.setAttribute('download', 'hydrant.csv');
+		a.click()
 	}
 
 	window.onload = startup;
