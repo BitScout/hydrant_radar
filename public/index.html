@@ -49,13 +49,15 @@
 <body>
 <div id="map" style="width: 100%; height: 100%;"></div>
 <div id="gpsToggleButton" class="button" style="width: 3em; left: 49%; top: 1em; color:white; background-color:black;" role="button">GPS</div>
-<div id="downloadCsvButton" class="button" style="width: 3em; right: 1em; top: 1em; color:black; background-color:lightgrey;" role="button">CSV</div>
+<div id="surveyModeToggleButton" class="button" style="width: 4em; right: 1em; top: 1em; color:black; background-color:white;" role="button">Zensus</div>
+<div id="downloadCsvButton" class="button" style="width: 3em; right: 1em; top: 3em; color:black; background-color:lightgrey; display: none;" role="button">CSV</div>
 <script>
 	if (location.protocol !== 'https:') {
 		location.replace(`https:${location.href.substring(location.protocol.length)}`);
 	}
 
 	var gpsEnabled = true; // Default value, unless set in the URL anchor.
+	var surveyModeEnabled = false;
 	const latLonRange = 0.02; // Range (in degrees) for which hydrants are loaded.
 	const movementLimit = 0.007; // Should be about half to one third of latLonRange.
 
@@ -116,7 +118,7 @@
 		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> | <a href="https://www.feuerwehr-dettelbach.de/" target="_blank">FF Dettelbach</a> | <a href="https://github.com/BitScout/hydrant_radar" target="_blank">GitHub</a>'
 	}).addTo(map);
 
-	var items = [];
+	var markers = [];
 	const currentPositionMarker = L.marker(initialPosition).addTo(map);
 	const distanceCircles = [
 		L.circle(initialPosition, {color: 'grey', fillOpacity: 0.0, radius: 20}).addTo(map), // 1x B
@@ -131,6 +133,7 @@
 	function addHydrant(item) {
 		var label = '';
 		var itemIcon = icons['icon_hydrant_red'];
+		var highlighted = false;
 		const blueWaterSources = ['powered_pump'];
 
 		if(item.tags['colour'] == 'blue' || blueWaterSources.includes(item.tags['water_source'])){itemIcon = icons['icon_hydrant_blue'];}
@@ -140,6 +143,10 @@
 				label = 'Unterflurhydrant';
 				itemIcon = icons['icon_hydrant_red_underground'];
 				if(item.tags['colour'] == 'blue' || blueWaterSources.includes(item.tags['water_source'])){itemIcon = icons['icon_hydrant_blue_underground'];}
+
+				if (undefined == item.tags['fire_hydrant:diameter']) {
+					highlighted = true;
+				}
 				break;
 			case 'pillar':
 				label = 'Überflurhydrant';
@@ -197,54 +204,63 @@
 			label = '[keine Informationen]';
 		}
 
-		L.marker([item.lat, item.lon], {icon: itemIcon}).addTo(map).bindPopup(label);
+		if ((undefined == item.tags['water_source']) || ((undefined == item.tags['fire_hydrant:position']) && (undefined == item.tags['position']))) {
+			highlighted = true;
+		}
+
+		var markerOpacity = surveyModeEnabled ? (highlighted ? 1 : .3) : 1;
+
+		var markerOptions = {icon: itemIcon};
+		markerOptions.opacity = markerOpacity;
+		markers.push(L.marker([item.lat, item.lon], markerOptions).addTo(map).bindPopup(label));
 	}
 
 	function addSuctionPoint(item) {
 		var label = 'Löschwasserentnahmestelle';
-		L.marker([item.lat, item.lon], {title: 'label', icon: icons['icon_suction_point']}).addTo(map).bindPopup(label);
+		markers.push(L.marker([item.lat, item.lon], {title: 'label', icon: icons['icon_suction_point']}).addTo(map).bindPopup(label));
 	}
 
 	function addWaterTank(item) {
 		var label = 'Löschwassertank';
-		L.marker([item.lat, item.lon], {title: 'label', icon: icons['icon_water_tank']}).addTo(map).bindPopup(label);
+		markers.push(L.marker([item.lat, item.lon], {title: 'label', icon: icons['icon_water_tank']}).addTo(map).bindPopup(label));
 	}
 
 	function addKeyDepot(item) {
 		var label = 'Schlüsseldepot';
-		L.marker([item.lat, item.lon], {title: 'label', icon: icons['icon_key_depot']}).addTo(map).bindPopup(label);
+		markers.push(L.marker([item.lat, item.lon], {title: 'label', icon: icons['icon_key_depot']}).addTo(map).bindPopup(label));
 	}
 
 	function updateItems(lat, lon) {
 		lastUpdatedPosition = [lat, lon];
 		//console.log('UPDATING for '+lat+' / '+lon);
 
-		// Remove existing hydrants etc from map
-		items.forEach((item, index) => {item.removeFrom(map);});
-
 		// Request Overpass API data
 		var latLonFromTo = (lat-latLonRange/2)+','+(lon-latLonRange)+','+(lat+latLonRange/2)+','+(lon+latLonRange);
 		fetch('https://www.overpass-api.de/api/interpreter?data=[out:json][timeout:25];(node["emergency"]('+latLonFromTo+'););out%20meta;')
 		.then(response => response.json())
-		.then(response =>
-			response.elements.forEach((item, index) => {
-				switch(item.tags['emergency']) {
-					case 'fire_hydrant':
-						addHydrant(item);
-						break;
-					case 'suction_point':
-						addSuctionPoint(item);
-						break;
-					case 'water_tank':
-						addWaterTank(item);
-						break;
-					case 'key_depot':
-						addKeyDepot(item);
-						break;
-					default:
-						//console.log(item.tags['emergency']);
-				}
-			})
+		.then(response => {
+				// Remove existing hydrants etc from map
+				markers.forEach((marker, index) => {marker.removeFrom(map);});
+
+				response.elements.forEach((item, index) => {
+					switch(item.tags['emergency']) {
+						case 'fire_hydrant':
+							addHydrant(item);
+							break;
+						case 'suction_point':
+							addSuctionPoint(item);
+							break;
+						case 'water_tank':
+							addWaterTank(item);
+							break;
+						case 'key_depot':
+							addKeyDepot(item);
+							break;
+						default:
+							//console.log(item.tags['emergency']);
+					}
+				});
+			}
 		)
 	}
 
@@ -319,6 +335,18 @@
 			updateAnchor();
 		});
 
+		surveyModeToggleButton = document.getElementById("surveyModeToggleButton");
+		surveyModeToggleButton.addEventListener('click', function (event) {
+			surveyModeEnabled = !surveyModeEnabled;
+			downloadCsvButton.style.display = surveyModeEnabled ? 'block' : 'none';
+			updateSurveyModeToggleButton();
+
+			var urlParts = document.URL.split('#');
+			var anchor = urlParts[1];
+			var anchorParts = anchor.split('/');
+			updateItems(Number(anchorParts[2]), Number(anchorParts[3]));
+		});
+
 		downloadCsvButton = document.getElementById("downloadCsvButton");
 		downloadCsvButton.addEventListener('click', function (event) {
 			generateCsv(';');
@@ -328,6 +356,11 @@
 	function updateGpsButton() {
 		gpsToggleButton.style.backgroundColor = gpsEnabled ? 'black' : 'white';
 		gpsToggleButton.style.color = gpsEnabled ? 'white' : 'black';
+	}
+
+	function updateSurveyModeToggleButton() {
+		surveyModeToggleButton.style.backgroundColor = surveyModeEnabled ? 'black' : 'white';
+		surveyModeToggleButton.style.color = surveyModeEnabled ? 'white' : 'black';
 	}
 
 	function generateCsv(separator) {
