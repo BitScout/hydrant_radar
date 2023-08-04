@@ -328,7 +328,7 @@
 
 	function generateCsv(separator) {
 		var csv = [];
-		csv.push(['Hydrantennummer', 'Basistyp', 'Hydrantentyp', 'Position', 'Durchmesser', 'Anschlüsse', 'Wasserquelle', 'Breitengrad', 'Längengrad', 'OSM-Link', 'Hinweise'].join(separator));
+		csv.push(['Hydrantennummer', 'Basistyp', 'Hydrantentyp', 'Position', 'Durchmesser', 'Anschlüsse', 'Wasserquelle', 'Straße', 'Hausnummer', 'Breitengrad', 'Längengrad', 'OSM-Link', 'Hinweise'].join(separator));
 
 		// Request Overpass API data
 		var bounds = map.getBounds();
@@ -365,6 +365,8 @@
 						item.tags['fire_hydrant:diameter'],
 						item.tags['couplings'],
 						csvMapping['water_source'][item.tags['water_source']] ?? item.tags['water_source'],
+						item.tags['addr:street'],
+						item.tags['addr:housenumber'],
 						item.lat,
 						item.lon,
 						urlParts[0]+'#0/19/'+item.lat+'/'+item.lon,
