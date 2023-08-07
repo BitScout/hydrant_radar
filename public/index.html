@@ -288,7 +288,11 @@
 
 	function updateView(lat, lon, setView) {
 		currentPositionMarker.setLatLng([lat, lon]);
-		distanceCircles.forEach((item, index) => {item.setLatLng([lat, lon]);});
+
+		distanceCircles.forEach((item, index) => {
+			item.setLatLng([lat, lon]);
+			item.setStyle({opacity: surveyModeEnabled ? 0 : 1});
+		});
 		updateAnchor();
 
 		if(setView) {
