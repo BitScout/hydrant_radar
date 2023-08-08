@@ -119,6 +119,7 @@
 	}).addTo(map);
 
 	var markers = [];
+	const currentPositionMarker = L.marker(initialPosition).addTo(map);
 	const distanceCircles = [
 		L.circle(initialPosition, {color: 'grey', fillOpacity: 0.0, radius: 20}).addTo(map), // 1x B
 		L.circle(initialPosition, {color: 'grey', fillOpacity: 0.0, radius: 40}).addTo(map), // 2x B
@@ -143,7 +144,7 @@
 				itemIcon = icons['icon_hydrant_red_underground'];
 				if(item.tags['colour'] == 'blue' || blueWaterSources.includes(item.tags['water_source'])){itemIcon = icons['icon_hydrant_blue_underground'];}
 
-				if (undefined == item.tags['fire_hydrant:diameter']) {
+				if ((undefined == item.tags['fire_hydrant:diameter']) && (undefined == item.tags['diameter'])) {
 					highlighted = true;
 				}
 				break;
@@ -207,26 +208,27 @@
 			highlighted = true;
 		}
 
-		var markerOpacity = surveyModeEnabled ? (highlighted ? 1 : .3) : 1;
-
-		var markerOptions = {icon: itemIcon};
-		markerOptions.opacity = markerOpacity;
-		markers.push(L.marker([item.lat, item.lon], markerOptions).addTo(map).bindPopup(label));
+		var markerOpacity = highlighted ? 1 : getSurveyMarkerOpacity();
+		markers.push(L.marker([item.lat, item.lon], {icon: itemIcon, opacity: markerOpacity}).addTo(map).bindPopup(label));
 	}
 
 	function addSuctionPoint(item) {
 		var label = 'Löschwasserentnahmestelle';
-		markers.push(L.marker([item.lat, item.lon], {title: 'label', icon: icons['icon_suction_point']}).addTo(map).bindPopup(label));
+		markers.push(L.marker([item.lat, item.lon], {title: 'label', icon: icons['icon_suction_point'], opacity: getSurveyMarkerOpacity()}).addTo(map).bindPopup(label));
 	}
 
 	function addWaterTank(item) {
 		var label = 'Löschwassertank';
-		markers.push(L.marker([item.lat, item.lon], {title: 'label', icon: icons['icon_water_tank']}).addTo(map).bindPopup(label));
+		markers.push(L.marker([item.lat, item.lon], {title: 'label', icon: icons['icon_water_tank'], opacity: getSurveyMarkerOpacity()}).addTo(map).bindPopup(label));
 	}
 
 	function addKeyDepot(item) {
 		var label = 'Schlüsseldepot';
-		markers.push(L.marker([item.lat, item.lon], {title: 'label', icon: icons['icon_key_depot']}).addTo(map).bindPopup(label));
+		markers.push(L.marker([item.lat, item.lon], {title: 'label', icon: icons['icon_key_depot'], opacity: getSurveyMarkerOpacity()}).addTo(map).bindPopup(label));
+	}
+
+	function getSurveyMarkerOpacity() {
+		return surveyModeEnabled ? .3 : 1;
 	}
 
 	function updateItems(lat, lon) {
@@ -286,6 +288,7 @@
 	}
 
 	function updateCircles(lat, lon) {
+		currentPositionMarker.setLatLng([lat, lon]);
 		distanceCircles.forEach((item, index) => {
 			item.setLatLng([lat, lon]);
 			item.setStyle({opacity: surveyModeEnabled ? 0 : 1});
