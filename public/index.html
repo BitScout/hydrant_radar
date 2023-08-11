@@ -138,9 +138,13 @@
 
 		if(item.tags['colour'] == 'blue' || blueWaterSources.includes(item.tags['water_source'])){itemIcon = icons['icon_hydrant_blue'];}
 
+		if(item.tags['name']) {
+			label = item.tags['name'] + '<br>';
+		}
+
 		switch(item.tags['fire_hydrant:type']) {
 			case 'underground':
-				label = 'Unterflurhydrant';
+				label += 'Unterflurhydrant';
 				itemIcon = icons['icon_hydrant_red_underground'];
 				if(item.tags['colour'] == 'blue' || blueWaterSources.includes(item.tags['water_source'])){itemIcon = icons['icon_hydrant_blue_underground'];}
 
@@ -149,7 +153,7 @@
 				}
 				break;
 			case 'pillar':
-				label = 'Überflurhydrant';
+				label += 'Überflurhydrant';
 				itemIcon = icons['icon_hydrant_red_pillar'];
 				if(item.tags['colour'] == 'blue' || blueWaterSources.includes(item.tags['water_source'])){itemIcon = icons['icon_hydrant_blue_pillar'];}
 				break;
@@ -190,6 +194,20 @@
 				case undefined:
 					label += '<br>Trinkwassernetz';
 					break;
+				case 'well':
+				case 'tube_well':
+				case 'groundwater':
+					label += '<br>Brunnen';
+					break;
+				case 'river':
+					label += '<br>Fluss';
+					break;
+				case 'stream':
+					label += '<br>Bach';
+					break;
+				case 'lake':
+					label += '<br>See';
+					break;
 				default:
 					label += '<br>Löschwassernetz';
 					break;
@@ -198,6 +216,10 @@
 
 		if(item.tags['ref']) {
 			label += '<br>Referenznummer ' + item.tags['ref'];
+		}
+
+		if(item.tags['description']) {
+			label += '<br>' + item.tags['description'];
 		}
 
 		if (label == '') {
