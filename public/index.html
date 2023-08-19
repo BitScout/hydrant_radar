@@ -144,7 +144,7 @@
 
 		switch(item.tags['fire_hydrant:type']) {
 			case 'underground':
-				label += 'Unterflurhydrant';
+				label += 'UH';
 				itemIcon = icons['icon_hydrant_red_underground'];
 				if(item.tags['colour'] == 'blue' || blueWaterSources.includes(item.tags['water_source'])){itemIcon = icons['icon_hydrant_blue_underground'];}
 
@@ -153,7 +153,7 @@
 				}
 				break;
 			case 'pillar':
-				label += 'Überflurhydrant';
+				label += 'OH';
 				itemIcon = icons['icon_hydrant_red_pillar'];
 				if(item.tags['colour'] == 'blue' || blueWaterSources.includes(item.tags['water_source'])){itemIcon = icons['icon_hydrant_blue_pillar'];}
 				break;
@@ -165,14 +165,10 @@
 			label += ' ' + item.tags['diameter'] + ' mm'
 		}
 
-		if(item.tags['couplings'] && item.tags['couplings'] > 1) {
-			label += ' mit ' + item.tags['couplings'] + ' Kupplungen'
-		}
-
 		if(item.tags['fire_hydrant:position']) {
 			switch(item.tags['fire_hydrant:position']) {
 				case 'lane':
-					label += '<br>Straße';
+					label += '<br>Straßenfläche';
 					break;
 				case 'sidewalk':
 					label += '<br>Gehsteig';
@@ -192,7 +188,7 @@
 				case 'water_works':
 				case 'tap':
 				case undefined:
-					label += '<br>Trinkwassernetz';
+					// Show nothing, this is the default
 					break;
 				case 'well':
 				case 'tube_well':
@@ -214,8 +210,12 @@
 			}
 		}
 
-		if(item.tags['ref']) {
-			label += '<br>Referenznummer ' + item.tags['ref'];
+		if(surveyModeEnabled && item.tags['ref']) {
+			label += '<br>[' + item.tags['ref'] + ']';
+
+			if(item.tags['addr:street'] && item.tags['addr:housenumber']) {
+				label += ' ' + item.tags['addr:street'] + ' ' + item.tags['addr:housenumber'];
+			}
 		}
 
 		if(item.tags['description']) {
