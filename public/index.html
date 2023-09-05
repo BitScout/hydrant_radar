@@ -210,8 +210,12 @@
 			}
 		}
 
-		if(surveyModeEnabled && item.tags['ref']) {
-			label += '<br>[' + item.tags['ref'] + ']';
+		if(surveyModeEnabled && (item.tags['ref'] || (item.tags['addr:street'] && item.tags['addr:housenumber']))) {
+			label += '<br>';
+
+			if(item.tags['ref']) {
+				label += ' [' + item.tags['ref'] + ']';
+			}
 
 			if(item.tags['addr:street'] && item.tags['addr:housenumber']) {
 				label += ' ' + item.tags['addr:street'] + ' ' + item.tags['addr:housenumber'];
@@ -236,6 +240,11 @@
 
 	function addSuctionPoint(item) {
 		var label = 'Löschwasserentnahmestelle';
+
+		if(surveyModeEnabled && item.tags['addr:street'] && item.tags['addr:housenumber']) {
+			label += '<br>' + item.tags['addr:street'] + ' ' + item.tags['addr:housenumber'];
+		}
+
 		markers.push(L.marker([item.lat, item.lon], {title: 'label', icon: icons['icon_suction_point'], opacity: getSurveyMarkerOpacity()}).addTo(map).bindPopup(label));
 	}
 
@@ -401,7 +410,7 @@
 
 	function generateCsv(separator) {
 		var csv = [];
-		csv.push(['Hydrantennummer', 'Basistyp', 'Hydrantentyp', 'Position', 'Durchmesser', 'Anschlüsse', 'Wasserquelle', 'Straße', 'Hausnummer', 'Breitengrad', 'Längengrad', 'OSM-Link', 'Hinweise'].join(separator));
+		csv.push(['Hydrantennummer', 'Basistyp', 'Hydrantentyp', 'Position', 'Durchmesser', 'Anschlüsse', 'Wasserquelle', 'Straße', 'Hausnummer', 'PLZ', 'Stadt', 'Ortsteil', 'Breitengrad', 'Längengrad', 'OSM-Link', 'Hinweise'].join(separator));
 
 		// Request Overpass API data
 		var bounds = map.getBounds();
@@ -428,6 +437,9 @@
 						if(undefined == item.tags['fire_hydrant:position']) {
 							notes.push('Position fehlt');
 						}
+						if(undefined == item.tags['ref']) {
+							notes.push('Hydrantennummer fehlt');
+						}
 					}
 
 					var row = [
@@ -440,6 +452,9 @@
 						csvMapping['water_source'][item.tags['water_source']] ?? item.tags['water_source'],
 						item.tags['addr:street'],
 						item.tags['addr:housenumber'],
+						item.tags['addr:postcode'],
+						item.tags['addr:city'],
+						item.tags['addr:subdistrict'],
 						item.lat,
 						item.lon,
 						urlParts[0]+'#0/19/'+item.lat+'/'+item.lon,
