@@ -4,7 +4,7 @@
 	<base target="_top">
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>HydrantRadar</title>
+	<title>Hydranten.EU</title>
 	<link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
 
 	<!-- Primary Meta Tags -->
@@ -15,13 +15,13 @@
 	<meta property="og:type" content="website">
 	<meta property="og:title" content="Hydrant Radar">
 	<meta property="og:description" content="Die nähesten Feuerwehrhydranten, sofort!">
-	<meta property="og:image" content="https://final-url/preview.png">
+	<meta property="og:image" content="https://hydranten.eu/preview.png">
 
 	<!-- Twitter -->
 	<meta property="twitter:card" content="summary_large_image">
 	<meta property="twitter:title" content="Hydrant Radar">
 	<meta property="twitter:description" content="Die nähesten Feuerwehrhydranten, sofort!">
-	<meta property="twitter:image" content="https://final-url/preview.png">
+	<meta property="twitter:image" content="https://hydranten.eu/preview.png">
 
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin=""/>
 	<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
@@ -51,6 +51,7 @@
 <div id="gpsToggleButton" class="button" style="width: 3em; left: 49%; top: 1em; color:white; background-color:black;" role="button">GPS</div>
 <div id="surveyModeToggleButton" class="button" style="width: 4em; right: 1em; top: 1em; color:black; background-color:white;" role="button">Zensus</div>
 <div id="downloadCsvButton" class="button" style="width: 3em; right: 1em; top: 3em; color:black; background-color:lightgrey; display: none;" role="button">CSV</div>
+<div id="helpButton" class="button" style="width: 3em; left: 49%; bottom: 1em; color:black; background-color:lightgrey;" role="button">Hilfe</div>
 <script>
 	if (location.protocol !== 'https:') {
 		location.replace(`https:${location.href.substring(location.protocol.length)}`);
@@ -234,6 +235,10 @@
 			highlighted = true;
 		}
 
+		if(!item.tags['addr:housenumber']) {
+			highlighted = true;
+		}
+
 		var markerOpacity = highlighted ? 1 : getSurveyMarkerOpacity();
 		markers.push(L.marker([item.lat, item.lon], {icon: itemIcon, opacity: markerOpacity}).addTo(map).bindPopup(label));
 	}
@@ -311,12 +316,12 @@
 	}
 
 	function gpsPositionChanged(pos) {
-		if(!gpsEnabled) {
-			return;
-		}
-
 		var mapPosition = pos.coords;
-		updateView(mapPosition.latitude, mapPosition.longitude, true)
+		currentPositionMarker.setLatLng([mapPosition.latitude, mapPosition.longitude]);
+
+		if(gpsEnabled) {
+			updateView(mapPosition.latitude, mapPosition.longitude, true)
+		}
 	}
 
 	function positionError(err) {
@@ -324,7 +329,6 @@
 	}
 
 	function updateCircles(lat, lon) {
-		currentPositionMarker.setLatLng([lat, lon]);
 		distanceCircles.forEach((item, index) => {
 			item.setLatLng([lat, lon]);
 			item.setStyle({opacity: surveyModeEnabled ? 0 : 1});
@@ -395,6 +399,11 @@
 		downloadCsvButton = document.getElementById("downloadCsvButton");
 		downloadCsvButton.addEventListener('click', function (event) {
 			generateCsv(';');
+		});
+
+		helpButton = document.getElementById("helpButton");
+		helpButton.addEventListener('click', function (event) {
+			window.location.href = "de_hilfe.html";
 		});
 	}
 

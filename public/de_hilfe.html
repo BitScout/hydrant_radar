@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+	<base target="_top">
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Hydranten.EU</title>
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+
+	<!-- Primary Meta Tags -->
+	<meta name="title" content="Hydrant Radar">
+	<meta name="description" content="Die nähesten Feuerwehrhydranten, sofort!">
+
+	<!-- Open Graph / Facebook -->
+	<meta property="og:type" content="website">
+	<meta property="og:title" content="Hydrant Radar">
+	<meta property="og:description" content="Die nähesten Feuerwehrhydranten, sofort!">
+	<meta property="og:image" content="https://hydranten.eu/preview.png">
+
+	<!-- Twitter -->
+	<meta property="twitter:card" content="summary_large_image">
+	<meta property="twitter:title" content="Hydrant Radar">
+	<meta property="twitter:description" content="Die nähesten Feuerwehrhydranten, sofort!">
+	<meta property="twitter:image" content="https://hydranten.eu/preview.png">
+
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin=""/>
+	<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+	<style>
+		html, body {
+			height: 100%;
+			margin: 0;
+		}
+		.content {
+			width: 80%;
+			max-width: 80%;
+			margin: auto;
+			margin-top: 2em;
+			margin-bottom: 2em;
+		}
+		.part {
+			width: 100%;
+			max-width: 100%;
+			margin: auto;
+			margin-top: 1em;
+			margin-bottom: 1em;
+			background-color: mintcream;
+			border: dotted black 1px;
+			padding: 1em;
+			line-height: 1.7em;
+		}
+		.button {
+			height: 1.1em;
+			position:fixed;
+			z-index:1000;
+			text-align: center; padding: .1em;
+			border: 2px solid orangered;
+			border-radius: .6em;
+		}
+	</style>
+</head>
+<body>
+	<div id="helpButton" class="button" style="width: 4em; left: 48%; bottom: 1em; color:black; background-color:lightgrey;" role="button">Zurück</div>
+	<div class="content">
+		<div class="part">
+			<h2>Was ist das hier?</h2>
+			Diese Webanwendung soll als eine Art <b>Hydranten-Radar</b> dienen.<br>
+			Wenn Sie die Seite aufrufen und die Ermittlung Ihrer Position freigeben, dann sehen Sie:
+			<ul>
+				<li>Ihre aktuelle Position auf einer Karte.</li>
+				<li>
+					Hydranten, Saugstellen, Löschwasserbehälter und Schlüsseldepots in Ihrer Nähe,
+					sofern diese auf <a href="https://openstreetmap.org/" target="_blank">Openstreetmap</a>	eingetragen sind.
+					Durch einen Klick auf die Symbole werden ggf. weitere Informationen angezeigt.
+				</li>
+				<li>
+					Kreise rund um Ihre Position, die typische Schlauchlängen (Luftlinie) repräsentieren:
+					<ul>
+						<li>Grau: 20 m (Standard B-Schlauch)</li>
+						<li>Rot: 100 m (5 B-Schläuche, oft die Länge auf einer Haspel)</li>
+						<li>Schwarz: 500 m (Ein Rollcontainer für lange Wegstrecke)</li>
+					</ul>
+				</li>
+			</ul>
+			<h3>Einschränkungen</h3>
+			<b>
+				Diese Anwendung ist eine Webseite und die Hydranten werden nicht auf Ihrem Gerät vorgehalten!<br>
+				Wenn Ihre Internetverbindung unterbrochen wird, dann können keine neuen Hydranten geladen werden!
+			</b>
+		</div>
+		<div class="part">
+			<h2>Was bedeuten die Knöpfe?</h2>
+			<ul>
+				<li><b>GPS</b>: Schaltet ein oder aus, ob die Karte Ihrer aktuellen Position folgt.</li>
+				<li>
+					<b>Zensus</b>: Zeigt Hydranten und andere Elemente schwächer an, wenn für diese alle relevanten Informationen vorliegen.
+					Versteckt außerdem die Distanz-Kreise. In diesem Modus können Sie prüfen, für welche Hydranten noch Informationen fehlen.
+					In diesem Modus wird auch der Knopf "CSV" angezeigt.<br>
+					Folgende Informationen sind nötig, damit ein Hydrant schwächer angezeigt wird:
+					<ul>
+						<li>Position (Straßenfläche, Gehweg, Grünfläche, ...</li>
+						<li>Wasserquelle (Meistens Trinkwassernetz)</li>
+						<li>Leitungsdurchmesser (Nur für Unterflurhydranten)</li>
+						<li>Hausnummer, besser die gesamte Adresse (Zur Anzeige im tabellarischen Hydrantenplan, siehe CSV.)</li>
+					</ul>
+				</li>
+				<li>
+					<b>CSV</b>: Lädt Ihnen eine CSV-Datei herunter, die alle Elemente im angezeigten Kartenbereich enhält.
+					Diese Datei kann z. B. in Microsoft Excel oder in LibreOffice geöffnet werden
+					und dient dann als tabellarischer Hydrantenplan.
+				</li>
+			</ul>
+		</div>
+		<div class="part">
+			<h2>Häufig gestellte Fragen</h2>
+			<h3>Die Karte zeigt nicht meine aktuelle Position an, wie kann ich das beheben?</h3>
+			<ul>
+				<li>
+					Wichtig ist zuerst, dass Sie die Seite auf einem Mobilgerät aufrufen. Die meisten Desktoprechner und Laptops
+					kennen ihre eigene Position nicht genau.
+				</li>
+				<li>
+					Standardmäßig erlaubt Ihr mobiler Browser Websites nicht die Ermittlung Ihres Standorts.
+					Sie sollten beim ersten Aufruf der Seite gefragt werden, ob Sie dies erlauben wollen.
+				</li>
+			</ul>
+			<h3>Warum sehe ich keine Hydranten in meiner Nähe?</h3>
+			Diese Seite kann nur Hydranten anzeigen, die auf <a href="https://openstreetmap.org/" target="_blank">Openstreetmap</a> eingetragen sind.<br>
+			Mit folgender <a href="https://openstreetmap.de/123/" target="_blank">Schritt-für-Schritt-Anleitung</a>
+			können Sie lernen, wie Sie sich dort anmelden und es gibt eine
+			<a href="https://www.youtube.com/watch?v=4UFf0UOSlJY" target="_blank">Video-Einführung</a> in die eigentliche Bearbeitung.<br>
+			<b>Wichtig</b>: Fügen Sie bitte nur Hydranten hinzu, die Sie zuvor persönlich vor Ort gesehen haben.
+		</div>
+		<div class="part">
+			<h2>Welche Daten werden gespeichert?</h2>
+			<ul>
+				<li>Der Server dieser Seite erhält nie Ihre Positionsdaten.</li>
+				<li>
+					Ihre Position wird ausschließlich an die <a href="https://overpass-api.de/" target="_blank">Overpass-API</a> gesendet,
+					damit Ihnen die Hydranten in der Nähe dargestellt werden können.<br>
+					Prinzipiell könnte auch der <a href="https://tile.openstreetmap.org/" target="_blank">Openstreetmap Tile-Server</a>
+					Ihre ungefähre Position erfahren, da von dort die Kartenteile in Ihrer Nähe heruntergeladen werden.
+				</li>
+				<li>
+					Ihre IP-Adresse wird nicht von diesem Server geloggt.<br>
+					Ggf. speichert jedoch einer oder mehrere der folgenden Dienste Ihre IP-Adresse:
+					<ul>
+						<li><a href="https://overpass-api.de/" target="_blank">Overpass-API</a>: Ermittelt die Hydranten in Ihrer Nähe.</li>
+						<li><a href="https://leafletjs.com/" target="_blank">Leaflet JS</a>: Hilft beim Anzeigen der Karte und der Hydranten.</li>
+						<li><a href="https://tile.openstreetmap.org/" target="_blank">Openstreetmap Tile-Server</a>: Liefert die Kartenteile.</li>
+					</ul>
+				</li>
+			</ul>
+		</div>
+
+	</div>
+	<script>
+		function startup() {
+			helpButton = document.getElementById("helpButton");
+			helpButton.addEventListener('click', function (event) {
+				window.location.href =  window.location.origin;
+			});
+		}
+
+		window.onload = startup;
+	</script>
+</body>
+</html>
