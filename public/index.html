@@ -51,7 +51,7 @@
 <div id="gpsToggleButton" class="button" style="width: 3em; left: 49%; top: 1em; color:white; background-color:black;" role="button">GPS</div>
 <div id="surveyModeToggleButton" class="button" style="width: 4em; right: 1em; top: 1em; color:black; background-color:white;" role="button">Zensus</div>
 <div id="downloadCsvButton" class="button" style="width: 3em; right: 1em; top: 3em; color:black; background-color:lightgrey; display: none;" role="button">CSV</div>
-<div id="helpButton" class="button" style="width: 3em; left: 49%; bottom: 1em; color:black; background-color:lightgrey;" role="button">Hilfe</div>
+<div id="helpButton" class="button" style="width: 3em; left: 49%; bottom: 2em; color:black; background-color:lightgrey;" role="button">Hilfe</div>
 <script>
 	if (location.protocol !== 'https:') {
 		location.replace(`https:${location.href.substring(location.protocol.length)}`);
@@ -361,7 +361,11 @@
 	}
 
 	function startup() {
-		navigator.geolocation.watchPosition(gpsPositionChanged, positionError);
+		const gpsOptions = {
+			enableHighAccuracy: true,
+			maximumAge: 600000,
+		};
+		navigator.geolocation.watchPosition(gpsPositionChanged, positionError, gpsOptions);
 		map.on("moveend", mapMoved);
 
 		var urlParts = document.URL.split('#');
