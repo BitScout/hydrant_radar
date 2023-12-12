@@ -115,7 +115,7 @@
 	const map = L.map('map').setView(initialPosition, 19);
 	const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 		maxZoom: 19,
-		minZoom: 15,
+		minZoom: 4,
 		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> | <a href="https://www.feuerwehr-dettelbach.de/" target="_blank">FF Dettelbach</a> | <a href="https://github.com/BitScout/hydrant_radar" target="_blank">GitHub</a>'
 	}).addTo(map);
 
@@ -336,6 +336,10 @@
 	}
 
 	function updateView(lat, lon, setView) {
+		if(map.getZoom() < 15) {
+			return; // Too far zoomed out, we wouldn't see anything anyways
+		}
+
 		updateCircles(lat, lon);
 		updateAnchor();
 
