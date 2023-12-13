@@ -97,6 +97,7 @@
 		'icon_suction_point',
 		'icon_water_tank',
 		'icon_key_depot',
+		'icon_swimming_pool',
 	];
 	var icons = [];
 
@@ -243,6 +244,16 @@
 		markers.push(L.marker([item.lat, item.lon], {icon: itemIcon, opacity: markerOpacity}).addTo(map).bindPopup(label));
 	}
 
+	function addPool(item) {
+		var label = 'Schwimmbecken<br>ca. '+Math.round(calculateSurfaceArea(item.geometry))+' m²';
+		var itemIcon = icons['icon_swimming_pool'];
+		var bounds = item.bounds;
+		var position = [(bounds.minlat + (bounds.maxlat - bounds.minlat)/2), (bounds.minlon + (bounds.maxlon - bounds.minlon)/2)];
+		var markerOpacity = getSurveyMarkerOpacity();
+
+		markers.push(L.marker(position, {icon: itemIcon, opacity: markerOpacity}).addTo(map).bindPopup(label));
+	}
+
 	function addSuctionPoint(item) {
 		var label = 'Löschwasserentnahmestelle';
 
@@ -277,29 +288,34 @@
 		//console.log('UPDATING for '+lat+' / '+lon);
 
 		// Request Overpass API data
-		var latLonFromTo = (lat-latLonRange/2)+','+(lon-latLonRange)+','+(lat+latLonRange/2)+','+(lon+latLonRange);
-		fetch('https://www.overpass-api.de/api/interpreter?data=[out:json][timeout:25];(node["emergency"]('+latLonFromTo+'););out%20meta;')
+		var latLonFromTo = roundCoord(lat-latLonRange/2)+','+roundCoord(lon-latLonRange)+','+roundCoord(lat+latLonRange/2)+','+roundCoord(lon+latLonRange);
+		fetch('https://www.overpass-api.de/api/interpreter?data=[out:json][timeout:25];(node["emergency"]('+latLonFromTo+');way["leisure"="swimming_pool"]('+latLonFromTo+'););out%20geom%20meta;')
 		.then(response => response.json())
 		.then(response => {
 				// Remove existing hydrants etc from map
 				markers.forEach((marker, index) => {marker.removeFrom(map);});
 
 				response.elements.forEach((item, index) => {
-					switch(item.tags['emergency']) {
-						case 'fire_hydrant':
-							addHydrant(item);
-							break;
-						case 'suction_point':
-							addSuctionPoint(item);
-							break;
-						case 'water_tank':
-							addWaterTank(item);
-							break;
-						case 'key_depot':
-							addKeyDepot(item);
-							break;
-						default:
-							//console.log(item.tags['emergency']);
+
+					if(item.tags['leisure']) {
+						addPool(item);
+					} else {
+						switch (item.tags['emergency']) {
+							case 'fire_hydrant':
+								addHydrant(item);
+								break;
+							case 'suction_point':
+								addSuctionPoint(item);
+								break;
+							case 'water_tank':
+								addWaterTank(item);
+								break;
+							case 'key_depot':
+								addKeyDepot(item);
+								break;
+							default:
+								//console.log(item.tags['emergency']);
+						}
 					}
 				});
 			}
@@ -362,6 +378,54 @@
 
 	function roundCoord(input) {
 		return Math.round(input * 10000)/10000;
+	}
+
+	function calculateSurfaceArea(coordinates) {
+		const EARTH_RADIUS = 6371000; // Earth radius in meters
+
+		// Convert degrees to radians
+		function toRadians(degrees) {
+			return degrees * (Math.PI / 180);
+		}
+
+		// Calculate the distance between two points using Haversine formula
+		function haversine(lat1, lon1, lat2, lon2) {
+			const dLat = toRadians(lat2 - lat1);
+			const dLon = toRadians(lon2 - lon1);
+
+			const a =
+					Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+					Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
+					Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+			const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+			return EARTH_RADIUS * c;
+		}
+
+		// Calculate the surface area using the shoelace formula
+		function shoelace(points) {
+			let area = 0;
+
+			for (let i = 0; i < points.length - 1; i++) {
+				const { lat: lat1, lon: lon1 } = points[i];
+				const { lat: lat2, lon: lon2 } = points[i + 1];
+				area += toRadians(lon2 - lon1) * (2 + Math.sin(toRadians(lat1)) + Math.sin(toRadians(lat2)));
+			}
+
+			area = (area * EARTH_RADIUS * EARTH_RADIUS) / 2;
+			return Math.abs(area);
+		}
+
+		// Ensure the input array has at least 3 coordinates
+		if (coordinates.length < 3) {
+			throw new Error('At least 3 coordinates are required to calculate the surface area.');
+		}
+
+		// Ensure the last coordinate is the same as the first one to close the polygon
+		coordinates.push(coordinates[0]);
+
+		return shoelace(coordinates);
 	}
 
 	function startup() {
