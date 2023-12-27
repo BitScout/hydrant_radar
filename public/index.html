@@ -472,6 +472,12 @@
 
 		downloadCsvButton = document.getElementById("downloadCsvButton");
 		downloadCsvButton.addEventListener('click', function (event) {
+			if(map.getZoom() < 13) {
+				alert('Bitte wählen Sie einen kleineren Kartenausschnitt.')
+
+				return;
+			}
+
 			generateCsv(';');
 		});
 
