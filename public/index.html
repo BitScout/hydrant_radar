@@ -267,8 +267,10 @@
 	function addWaterTank(item) {
 		var label = 'Löschwassertank';
 
-		if(item.tags['water_volume'] > 1) {
-			label += ' ' + item.tags['water_volume'] + ' m&sup3;'
+		if(parseInt(item.tags['water_volume']) > 1) {
+			label += ' ' + parseInt(item.tags['water_volume']) + ' m&sup3;'
+		} else if(parseInt(item.tags['water_tank:volume']) > 1) {
+			label += ' ' + parseInt(item.tags['water_tank:volume']) + ' m&sup3;'
 		}
 
 		markers.push(L.marker([item.lat, item.lon], {title: 'label', icon: icons['icon_water_tank'], opacity: getSurveyMarkerOpacity()}).addTo(map).bindPopup(label));
