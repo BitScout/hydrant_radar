@@ -13,6 +13,18 @@ with variable zoom.
 allowing you to pan and zoom to your target in advance.
 * Made from a German perspective, but meant to work worldwide, even if symbols or units (mm) don't match for now.
 
+## Features
+
+* Circles show you important distances:
+  * Grey: 20 m (standard "B" length)
+  * Red: 100 m (standard reel length)
+  * Black: 500 m (standard container for long distances)
+* If you enable survey mode ("Zensus"), the circles will disappear
+and all POIs with sufficient data will become partially transparent.
+This allows you to see at a glance, which hydrants need additional information.
+* Survey mode also shows you a button for exporting all POIs in the viewport
+into a single CSV file.
+
 ## Technology
 
 * Uses the default OSM map, using https://leafletjs.com/index.html
