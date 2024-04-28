@@ -50,7 +50,8 @@
 <div id="map" style="width: 100%; height: 100%;"></div>
 <div id="gpsToggleButton" class="button" style="width: 3em; left: 49%; top: 1em; color:white; background-color:black;" role="button">GPS</div>
 <div id="surveyModeToggleButton" class="button" style="width: 4em; right: 1em; top: 1em; color:black; background-color:white;" role="button">Zensus</div>
-<div id="downloadCsvButton" class="button" style="width: 3em; right: 1em; top: 3em; color:black; background-color:lightgrey; display: none;" role="button">CSV</div>
+<div id="openAuditChecklistButton" class="button" style="width: 5em; right: 1em; top: 3em; color:black; background-color:lightgrey; display: none;" role="button">Checkliste</div>
+<div id="downloadCsvButton" class="button" style="width: 3em; right: 1em; top: 5em; color:black; background-color:lightgrey; display: none;" role="button">CSV</div>
 <div id="helpButton" class="button" style="width: 3em; left: 49%; bottom: 2em; color:black; background-color:lightgrey;" role="button">Hilfe</div>
 <script>
 	if (location.protocol !== 'https:') {
@@ -461,6 +462,7 @@
 		surveyModeToggleButton.addEventListener('click', function (event) {
 			surveyModeEnabled = !surveyModeEnabled;
 			downloadCsvButton.style.display = surveyModeEnabled ? 'block' : 'none';
+			openAuditChecklistButton.style.display = surveyModeEnabled ? 'block' : 'none';
 			updateSurveyModeToggleButton();
 
 			var urlParts = document.URL.split('#');
@@ -479,6 +481,17 @@
 			}
 
 			generateCsv(';');
+		});
+
+		openAuditChecklistButton = document.getElementById("openAuditChecklistButton");
+		openAuditChecklistButton.addEventListener('click', function (event) {
+			if(map.getZoom() < 13) {
+				alert('Bitte wählen Sie einen kleineren Kartenausschnitt.')
+
+				return;
+			}
+
+			generateAuditChecklist();
 		});
 
 		helpButton = document.getElementById("helpButton");
@@ -566,6 +579,154 @@
 		a.setAttribute('href', url)
 		a.setAttribute('download', 'hydrant.csv');
 		a.click()
+	}
+
+	function generateAuditChecklist() {
+		var html = '<html><body><script src=\"https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js\"><\/script><style>';
+		html += 'td {border: 1px solid; padding: .5em; vertical-align: top;}';
+		html += 'a {color: black; text-decoration: none;}';
+		html += '.qrCode {padding-bottom: .5em;}';
+		html += '@media print {.hydrant {break-inside: avoid;}}';
+		html += '</style>';
+
+		var today  = new Date();
+		var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+		html += 'Hydrantenprüfliste, erzeugt am '+today.toLocaleDateString("de-DE", options)+'<br><br>';
+
+		// Request Overpass API data
+		var bounds = map.getBounds();
+		var latLonFromTo = bounds.getSouth()+','+bounds.getWest()+','+bounds.getNorth()+','+bounds.getEast();
+		fetch('https://www.overpass-api.de/api/interpreter?data=[out:json][timeout:25];(node["emergency"]('+latLonFromTo+'););out%20meta;')
+				.then(response => response.json())
+				.then(response => {
+							data = {};
+							data.strassen = {};
+
+							// Group hydrants by street
+							response.elements.forEach((item, index) => {
+								if('fire_hydrant' != item.tags['emergency']) {
+									return;
+								}
+
+								if('addr:street' in item.tags) {
+									var street = item.tags['addr:street'];
+								} else {
+									street = "";
+								}
+
+								data.strassen[street] = data.strassen[street] || [];
+								data.strassen[street].push(item);
+							});
+
+							// Get sorted list of street names
+							var streetnames = Object.keys(data.strassen);
+							streetnames.sort((a,b) => a.localeCompare(b));
+
+							// Sort by house number
+							streetnames.forEach(streetname => {
+								var hydrants = data.strassen[streetname];
+								hydrants.sort((a,b) => parseInt(a.tags['addr:housenumber']) - parseInt(b.tags['addr:housenumber']));
+								data.strassen[streetname] = hydrants;
+							})
+
+							streetnames.forEach(streetname => {
+								var hydrants = data.strassen[streetname];
+
+								hydrants.forEach((hydrant, index) => {
+									var tags = hydrant.tags;
+
+									html += '<table class="hydrant"><tr><td style="width: 14em;">';
+									html += ((tags['addr:subdistrict'] ? tags['addr:subdistrict'] : tags['addr:city']) ?? '')+'<br><b>'
+
+									if ('ref' in tags) {html += '['+tags['ref']+'] ';}
+									html += (tags['addr:street'] ?? '')+' '+(tags['addr:housenumber'] ?? '')+'</b><br>';
+
+									switch (tags['fire_hydrant:type']) {
+										case 'underground':
+											html += 'Unterflurhydrant ';
+											if (tags['fire_hydrant:diameter']) {
+												html += '(' + tags['fire_hydrant:diameter'] + ' mm)'
+											}
+											break;
+										case 'pillar':
+											html += 'Überflurhydrant ';
+											break;
+										default:
+											html += tags['fire_hydrant:type'];
+									}
+
+									if (tags['water_source']) {
+										switch (tags['water_source']) {
+											case 'main':
+											case 'water_works':
+											case 'tap':
+											case 'well':
+											case 'tube_well':
+											case 'groundwater':
+											case 'river':
+											case 'stream':
+											case 'lake':
+											case undefined:
+												// Show nothing, this is the default
+												break;
+											default:
+												html += '<br>Löschwassernetz';
+												break;
+										}
+									}
+
+									if (tags['fire_hydrant:position']) {
+										html += '<br>';
+										switch (tags['fire_hydrant:position']) {
+											case 'green': html += 'Grünfläche'; break;
+											case 'lane': html += 'Straßenfläche'; break;
+											case 'sidewalk': html += 'Gehsteig'; break;
+											case 'parking_lot': html += 'Stellplatzfläche'; break;
+										}
+									}
+
+									if (tags['description']) {
+										html += '<br>'+tags['description'];
+									}
+
+									html += '</td><td style="vertical-align: center; font-size: small;">';
+
+									var hydrantUrl = 'https://hydranten.eu/#0/19/' + hydrant.lat+'/'+hydrant.lon;
+									var qrDivId = Array(16+1).join((Math.random().toString(36)+'00000000000000000').slice(2, 18)).slice(0, 16);
+									html += '<div class="qrCode" id="'+qrDivId+'"><\/div><script type="text/javascript">new QRCode(document.getElementById("'+qrDivId+'"), {text: "'+hydrantUrl+'", width: 82, height: 82});<\/script>';
+									html += '<a href="'+hydrantUrl+'">'+hydrant.lat+'<br>'+hydrant.lon+'</a>';
+
+									html += '</td><td style="width: 22em;">'
+
+									switch(tags['fire_hydrant:type']) {
+										case 'underground':
+											html += 'Hydrantendeckel: &#9744; OK&nbsp;&nbsp;&nbsp;&#9744; Öse fehlt&nbsp;&nbsp;&nbsp;&#9744;<br>';
+											html += 'Klauendeckel: &#9744; OK&nbsp;&nbsp;&nbsp;&#9744; Fehlt&nbsp;&nbsp;&nbsp;&#9744;<br>';
+											html += 'Wasserabfluss: &#9744; OK&nbsp;&nbsp;&nbsp;&#9744; Langsam&nbsp;&nbsp;&nbsp;&#9744; Nein<br>';
+										break;
+										case 'pillar': html += ' ';
+											html += 'Abdeckungen: &#9744; OK&nbsp;&nbsp;&nbsp;&#9744;<br>';
+											html += 'Hydrantenkörper: &#9744; OK&nbsp;&nbsp;&nbsp;&#9744;<br>';
+										break;
+									}
+									html += 'Ventil: &#9744; OK&nbsp;&nbsp;&nbsp;&#9744;';
+
+									html += '</td></tr></table>';
+								});
+							});
+
+							openAuditChecklist(html);
+						}
+				);
+
+		html += '</body></html>';
+
+		return html;
+	}
+
+	function openAuditChecklist(html) {
+		var newWindow = window.open();
+		newWindow.document.write(html);
 	}
 
 	window.onload = startup;
