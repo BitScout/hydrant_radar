@@ -591,7 +591,7 @@
 
 		var today  = new Date();
 		var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-		html += 'Hydrantenprüfliste, erzeugt am '+today.toLocaleDateString("de-DE", options)+'<br><br>';
+		html += 'Hydrantenprüfliste, erzeugt am '+today.toLocaleDateString("de-DE", options)+'<br>Bitte alles erwähnenswerte notieren, unzutreffendes bitte streichen.<br><br>';
 
 		// Request Overpass API data
 		var bounds = map.getBounds();
@@ -635,7 +635,7 @@
 								hydrants.forEach((hydrant, index) => {
 									var tags = hydrant.tags;
 
-									html += '<table class="hydrant"><tr><td style="width: 14em;">';
+									html += '<table class="hydrant"><tr><td style="width: 12em;">';
 									html += ((tags['object:subdistrict'] ? tags['object:subdistrict'] : tags['object:city']) ?? '')+'<br><b>'
 
 									if ('ref' in tags) {html += '['+tags['ref']+'] ';}
@@ -689,20 +689,16 @@
 										html += '<br>'+tags['description'];
 									}
 
-									html += '</td><td style="vertical-align: center; font-size: small;">';
+									html += '</td>';
 
-									var hydrantUrl = 'https://hydranten.eu/#0/19/' + hydrant.lat+'/'+hydrant.lon;
-									var qrDivId = Array(16+1).join((Math.random().toString(36)+'00000000000000000').slice(2, 18)).slice(0, 16);
-									html += '<div class="qrCode" id="'+qrDivId+'"><\/div><script type="text/javascript">new QRCode(document.getElementById("'+qrDivId+'"), {text: "'+hydrantUrl+'", width: 82, height: 82});<\/script>';
-									html += '<a href="'+hydrantUrl+'">'+hydrant.lat+'<br>'+hydrant.lon+'</a>';
 
-									html += '</td><td style="width: 22em;">'
+									html += '<td style="width: 25em;">'
 
 									switch(tags['fire_hydrant:type']) {
 										case 'underground':
-											html += 'Schild: &#9744; OK&nbsp;&nbsp;&nbsp;&#9744; Fehlt&nbsp;&nbsp;&nbsp;&#9744; Falsch<br>';
-											html += 'Hydrantendeckel: &#9744; OK&nbsp;&nbsp;&nbsp;&#9744; Öse fehlt&nbsp;&nbsp;&nbsp;&#9744;<br>';
-											html += 'Klauendeckel: &#9744; OK&nbsp;&nbsp;&nbsp;&#9744; Fehlt&nbsp;&nbsp;&nbsp;&#9744;<br>';
+											html += 'Schild: &#9744; Vorhanden & korrekt&nbsp;&nbsp;&nbsp;&#9744; Falsch&nbsp;&nbsp;&nbsp;&#9744; Fehlt<br>';
+											html += 'Hydrantendeckel: &#9744; OK&nbsp;&nbsp;&nbsp;&#9744; Öse fehlt&nbsp;&nbsp;&nbsp;&#9744; Nicht zu öffnen<br>';
+											html += 'Klauendeckel: &#9744; OK&nbsp;&nbsp;&nbsp;&#9744; Nicht befestigt&nbsp;&nbsp;&nbsp;&#9744; Fehlt<br>';
 											html += 'Wasserabfluss: &#9744; OK&nbsp;&nbsp;&nbsp;&#9744; Langsam&nbsp;&nbsp;&nbsp;&#9744; Nein<br>';
 										break;
 										case 'pillar': html += ' ';
@@ -710,9 +706,16 @@
 											html += 'Hydrantenkörper: &#9744; OK&nbsp;&nbsp;&nbsp;&#9744;<br>';
 										break;
 									}
-									html += 'Ventil: &#9744; OK&nbsp;&nbsp;&nbsp;&#9744;';
+									html += 'Ventil: &#9744; OK&nbsp;&nbsp;&nbsp;&#9744; (Sehr) Schwergängig&nbsp;&nbsp;&nbsp;&#9744; nicht drehbar';
 
-									html += '</td></tr></table>';
+									html += '</td>';
+                                    html += '<td style="vertical-align: center; font-size: small;">';
+                                    var hydrantUrl = 'https://hydranten.eu/#0/19/' + hydrant.lat+'/'+hydrant.lon;
+                                    var qrDivId = Array(16+1).join((Math.random().toString(36)+'00000000000000000').slice(2, 18)).slice(0, 16);
+                                    html += '<a href="'+hydrantUrl+'">'+hydrant.lat+'<br>'+hydrant.lon+'</a>';
+                                    html += '<div class="qrCode" id="'+qrDivId+'"><\/div><script type="text/javascript">new QRCode(document.getElementById("'+qrDivId+'"), {text: "'+hydrantUrl+'", width: 82, height: 82});<\/script>';
+                                    html += '</td>';
+                                    html += '</tr></table>';
 								});
 
 								html += '<div class="page-break"></div>';
