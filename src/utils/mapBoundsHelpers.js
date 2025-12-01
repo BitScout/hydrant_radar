@@ -18,13 +18,13 @@ export function generateRequiredBoundsForMap(map) {
     return bounds;
 }
 
-export function generateApiRequestBoundsForMap(map) {
+export function generateExtendedBoundsForMap(map, km) {
     let mapBounds = map.getBounds();
-    let horizontalDegreesDistance = getDegreeOffsets(map.getBounds()._northEast.lat, 20);
+    let horizontalDegreesDistance = getDegreeOffsets(map.getBounds()._northEast.lat, km);
 
     let bounds = {};
-    bounds.north = roundCoord(mapBounds._northEast.lat + 0.20);
-    bounds.south = roundCoord(mapBounds._southWest.lat - 0.20);
+    bounds.north = roundCoord(mapBounds._northEast.lat + km / 100);
+    bounds.south = roundCoord(mapBounds._southWest.lat - km / 100);
     bounds.west = roundCoord(mapBounds._southWest.lng - horizontalDegreesDistance);
     bounds.east = roundCoord(mapBounds._northEast.lng + horizontalDegreesDistance);
 

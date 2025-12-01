@@ -54,5 +54,10 @@ The `movementLimit` should be about half of `latLonRange`.
 
 `npm install`
 
+`npm run dev` or `npm run preview`
+
 `npm run build`
 
+## References
+
+* Southwest German specialty: Würtemmberger Schachthydranten: https://wiki.openstreetmap.org/wiki/DE:Tag:emergency=fire_hydrant#Besondere_Bauformen

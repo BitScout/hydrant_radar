@@ -3,7 +3,7 @@ import localforage from "localforage";
 import {
     buildApiBoundsString,
     generateRequiredBoundsForMap,
-    generateApiRequestBoundsForMap
+    generateExtendedBoundsForMap
 } from './mapBoundsHelpers.js';
 
 const daysAfterWhichToRequestNewData = 1; // If the latest OSM API dataset is older than this many days, a new one will be requested.
@@ -95,7 +95,7 @@ function cleanupStoredDatasets(responseItems, maxAgeInDays) {
 }
 
 function performApiRequestAndStoreResponse(map, osmApiDatasets, callback) {
-    let apiRequestBounds = generateApiRequestBoundsForMap(map);
+    let apiRequestBounds = generateExtendedBoundsForMap(map, 20);
     let latLonFromTo = buildApiBoundsString(apiRequestBounds);
 
     if (latestApiRequestTimestamp + 10 * 1000 > Date.now()) {

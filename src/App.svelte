@@ -6,13 +6,12 @@
     import { generateAuditChecklist } from './utils/checklistGenerator.js';
     import { calculateSurfaceArea } from './utils/surfaceCaclulator.js';
     import { getOsmItems } from './utils/osmDataProvider.js';
-    import { roundCoord } from './utils/mapBoundsHelpers.js';
+    import { roundCoord, generateExtendedBoundsForMap } from './utils/mapBoundsHelpers.js';
     import localforage from "localforage";
 
     let updateSW;
-    let updateAvailable;
 
-    const movementLimit = 0.007;
+    let updateAvailable = false; // Used in onMount
     let initialPosition = [49.8022, 10.1603];
 
     let gpsEnabled = true; // Default value, unless set in the URL anchor.
@@ -94,9 +93,9 @@
 
         map = L.map(mapDiv).setView(initialPosition, 19);
         const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
+            maxZoom: 20,
             minZoom: 4,
-            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> | <a href="https://www.feuerwehr-dettelbach.de/" target="_blank">FF Dettelbach</a> | <a href="https://github.com/BitScout/hydrant_radar" target="_blank">GitHub</a> | <a href="https://legacy.hydranten.eu/">Alte Version</a>'
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> | <a href="https://www.feuerwehr-dettelbach.de/" target="_blank">FF Dettelbach</a> | <a href="https://github.com/BitScout/hydrant_radar" target="_blank">GitHub</a> | <a href="mailto:mail@hydranten.eu" target="_blank">Email</a> | <a href="https://legacy.hydranten.eu/" target="_blank">Alte Version</a>'
         }).addTo(map);
     }
 
@@ -105,9 +104,11 @@
         let iconDefinitions = [
             'icon_hydrant_red',
             'icon_hydrant_red_underground',
+            'icon_hydrant_red_underground_wsh',
             'icon_hydrant_red_pillar',
             'icon_hydrant_blue',
             'icon_hydrant_blue_underground',
+            'icon_hydrant_blue_underground_wsh',
             'icon_hydrant_blue_pillar',
             'icon_suction_point',
             'icon_water_tank',
@@ -155,6 +156,7 @@
         let itemIcon = icons['icon_hydrant_red'];
         let highlighted = false;
         const blueWaterSources = ['powered_pump'];
+        let useBlueVersion = (item.tags['colour'] == 'blue' || blueWaterSources.includes(item.tags['water_source']));
 
         if (item.tags['colour'] == 'blue' || blueWaterSources.includes(item.tags['water_source'])) {
             itemIcon = icons['icon_hydrant_blue'];
@@ -167,8 +169,10 @@
         switch (item.tags['fire_hydrant:type']) {
             case 'underground':
                 label += 'UH';
+
                 itemIcon = icons['icon_hydrant_red_underground'];
-                if (item.tags['colour'] == 'blue' || blueWaterSources.includes(item.tags['water_source'])) {
+
+                if (useBlueVersion) {
                     itemIcon = icons['icon_hydrant_blue_underground'];
                 }
 
@@ -179,7 +183,7 @@
             case 'pillar':
                 label += 'OH';
                 itemIcon = icons['icon_hydrant_red_pillar'];
-                if (item.tags['colour'] == 'blue' || blueWaterSources.includes(item.tags['water_source'])) {
+                if (useBlueVersion) {
                     itemIcon = icons['icon_hydrant_blue_pillar'];
                 }
                 break;
@@ -192,7 +196,19 @@
         }
 
         if (item.tags['fire_hydrant:style']) {
-            label += ' (' + item.tags['fire_hydrant:style'] + ')';
+            label += " (" + item.tags['fire_hydrant:style'].toUpperCase() + ")";
+
+            switch (item.tags['fire_hydrant:style']) {
+                case 'wsh':
+                    if (item.tags['fire_hydrant:type'] == 'underground') {
+                        if (useBlueVersion) {
+                            itemIcon = icons['icon_hydrant_blue_underground_wsh'];
+                        } else {
+                            itemIcon = icons['icon_hydrant_red_underground_wsh'];
+                        }
+                    }
+                break;
+            }
         }
 
         if (item.tags['fire_hydrant:position']) {
@@ -474,7 +490,7 @@
     }
 
     function helpButtonClicked() {
-        window.location.href = "de_hilfe.html";
+        window.open("de_hilfe.html", '_blank').focus();
     }
 </script>
 
@@ -492,8 +508,10 @@
     <button id="openAuditChecklistButton" on:click={openAuditChecklistButtonClicked}
             style="width: 10em; top: 8em; display: none;">Checkliste
     </button>
-    <button id="resetButton" on:click={doUpdate} style="top: 11.5em; width: 10em; display: none;">Zurücksetzen</button>
-    <button id="helpButton" on:click={helpButtonClicked} style="width: 5em; left: 49%; bottom: 1em; font-weight: bold; display: none;">
+    <button id="resetButton" on:click={doUpdate} style="top: 11.5em; width: 10em; display: none;">
+        Zurücksetzen
+    </button>
+    <button id="helpButton" on:click={helpButtonClicked} style="width: 5em; left: 45%; bottom: 1em; font-weight: bold; display: none;">
         Hilfe
     </button>
 </main>
