@@ -191,6 +191,10 @@
             label += ' ' + item.tags['diameter'] + ' mm'
         }
 
+        if (item.tags['fire_hydrant:style']) {
+            label += ' (' + item.tags['fire_hydrant:style'] + ')';
+        }
+
         if (item.tags['fire_hydrant:position']) {
             switch (item.tags['fire_hydrant:position']) {
                 case 'lane':
