@@ -32,6 +32,8 @@ A map of nearby fire hydrants and other stuff
 
 ## Technology
 
+![](doc/images/system_overview.jpg)
+
 * Uses the default OSM map, using https://leafletjs.com/index.html.
   Tiles are cached for up to 60 days.
 * Queries POIs from the Overpass API and stores them for 60 days in local memory.
