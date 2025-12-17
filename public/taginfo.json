@@ -1,0 +1,95 @@
+{
+  "data_format": 1,
+  "data_url": "https://hydranten.eu/taginfo.json",
+  "data_updated": "20251211T220000Z",
+  "project": {
+    "name": "Hydranten.EU",
+    "description": "A radar for hydrants, and a helper for keeping track of them",
+    "project_url": "https://hydranten.eu/",
+    "contact_name": "Christian Kollross",
+    "contact_email": "mail@hydranten.eu"
+  },
+  "tags": [
+    {
+      "key": "leisure",
+      "value": "swimming_pool",
+      "object_types": ["way"]
+    },
+    {
+      "key": "emergency",
+      "value": "fire_hydrant",
+      "object_types": ["node"]
+    },
+    {
+      "key": "emergency",
+      "value": "suction_point",
+      "object_types": ["node"]
+    },
+    {
+      "key": "emergency",
+      "value": "water_tank",
+      "object_types": ["node"]
+    },
+    {
+      "key": "emergency",
+      "value": "key_depot",
+      "object_types": ["node"]
+    },
+    {
+      "key": "fire_hydrant:type",
+      "object_types": ["node"]
+    },
+    {
+      "key": "fire_hydrant:position",
+      "object_types": ["node"]
+    },
+    {
+      "key": "fire_hydrant:diameter",
+      "object_types": ["node"]
+    },
+    {
+      "key": "fire_hydrant:style",
+      "object_types": ["node"]
+    },
+    {
+      "key": "ref",
+      "object_types": ["node"]
+    },
+    {
+      "key": "water_source",
+      "object_types": ["node"]
+    },
+    {
+      "key": "colour",
+      "object_types": ["node"]
+    },
+    {
+      "key": "name",
+      "object_types": ["node"]
+    },
+    {
+      "key": "description",
+      "object_types": ["node"]
+    },
+    {
+      "key": "object:housenumber",
+      "object_types": ["node"]
+    },
+    {
+      "key": "object:street",
+      "object_types": ["node"]
+    },
+    {
+      "key": "object:city",
+      "object_types": ["node"]
+    },
+    {
+      "key": "object:subdistrict",
+      "object_types": ["node"]
+    },
+    {
+      "key": "object:postcode",
+      "object_types": ["node"]
+    }
+  ]
+}
