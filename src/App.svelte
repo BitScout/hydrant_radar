@@ -26,30 +26,25 @@
 
     onMount(() => {
         ensureHTTPS();
-
-        updateSW = setupPWA(
-            () => {
-                updateAvailable = true; // called when new version is ready
-            },
-            () => {
-                console.log('App ready for offline use');
-            }
-        );
-
-        updateButtonsVisuals();
-        initializeMap();
-        initializeIcons();
-        initializeDistanceCircles();
-        initializeGps();
-        mapMoved();
+        hideDisclaimerIfAccepted();
     });
+
+    async function hideDisclaimerIfAccepted() {
+        let disclaimerAcceptedTimestamp = await localforage.getItem("disclaimerAccepted");
+
+        if (disclaimerAcceptedTimestamp > 0) {
+            initApp();
+        }
+    }
 
     async function doUpdate() {
         // Delete all stored API data!
         localforage.setItem("osmApiDatasets", []);
+        localforage.removeItem("disclaimerAccepted");
 
         // Clear caches
         const keys = await caches.keys();
+        console.log(keys);
         for (const key of keys) {
             if (key.startsWith('osm-') || key.startsWith('app-')) {
                 await caches.delete(key);
@@ -57,13 +52,15 @@
             }
         }
 
-        // Update the app
         if (updateSW) {
-            updateSW(true); // tells SW to skip waiting and activate new version
+            updateSW(true);
         }
 
         window.location.reload();
     }
+
+    function long2tile(lon,zoom) { return (Math.floor((lon+180)/360*Math.pow(2,zoom))); }
+    function lat2tile(lat,zoom)  { return (Math.floor((1-Math.log(Math.tan(lat*Math.PI/180) + 1/Math.cos(lat*Math.PI/180))/Math.PI)/2 *Math.pow(2,zoom))); }
 
     function ensureHTTPS() {
         if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
@@ -490,16 +487,42 @@
     }
 
     function helpButtonClicked() {
-        window.open("de_hilfe.html", '_blank').focus();
+        window.open("help_de.html", '_blank').focus();
+    }
+
+    function disclaimerButtonClicked() {
+        localforage.setItem("disclaimerAccepted", Date.now(), function (err) {initApp();})
+    }
+
+    function initApp() {
+        updateSW = setupPWA(
+            () => {
+                updateAvailable = true; // called when new version is ready
+            },
+            () => {
+                console.log('App ready for offline use');
+            }
+        );
+
+        updateButtonsVisuals();
+        initializeMap();
+        initializeIcons();
+        initializeDistanceCircles();
+        initializeGps();
+        mapMoved();
+
+        document.getElementById('gpsToggleButton').style.display = 'block';
+        document.getElementById('surveyModeToggleButton').style.display = 'block';
+        document.getElementById('disclaimerPopup').style.display = 'none';
     }
 </script>
 
 <main style="width: 100%; height: 100%;">
     <div id="map" style="width: 100%; height: 100%;"></div>
     <button id="gpsToggleButton" on:click={gpsButtonClicked}
-            style="width: 5em; left: 45%; top: 1em; font-weight: bold;">GPS
+            style="width: 5em; left: 45%; top: 1em; font-weight: bold; display: none;">GPS
     </button>
-    <button id="surveyModeToggleButton" on:click={surveyModeToggleButtonClicked} style="width: 4em; top: 1em;">
+    <button id="surveyModeToggleButton" on:click={surveyModeToggleButtonClicked} style="width: 4em; top: 1em; display: none;">
         ☰
     </button>
     <button id="downloadCsvButton" on:click={downloadCsvButtonClicked} style="width: 10em; top: 4.5em; display: none;">
@@ -511,9 +534,39 @@
     <button id="resetButton" on:click={doUpdate} style="top: 11.5em; width: 10em; display: none;">
         Zurücksetzen
     </button>
-    <button id="helpButton" on:click={helpButtonClicked} style="width: 5em; left: 45%; bottom: 1em; font-weight: bold; display: none;">
+    <button id="helpButton" on:click={helpButtonClicked} style="width: 5em; left: 45%; bottom: 1em; font-weight: bold;">
         Hilfe
     </button>
+    <div id="disclaimerPopup">
+        <b style="color: red;">
+            Bei Problemen mit der App oder im Zweifelsfall<br>
+            sofort zur konventionellen Hydrantensuche wechseln!</b>
+        <br>
+        <hr>
+        <b>Datenschutzhinweise</b><br>
+        <br>
+        Die Server von Hydranten.EU erhalten niemals Ihre Geokoordinaten (GPS-Position).<br>
+        <br>
+        Diese Website nutzt Kartendienste der OpenStreetMap Foundation, St John’s Innovation Centre,
+        Cowley Road, Cambridge, CB4 0WS, Vereinigtes Königreich (kurz OSMF).
+        Ihr Internetbrowser oder Ihre Anwendung stellt eine Verbindung zu Servern her,
+        die von der OSMF in Großbritannien und anderen Ländern betrieben werden.
+        Der Betreiber dieser Website hat keine Kontrolle über solche Verbindungen und die Verarbeitung Ihrer Daten
+        durch die OSMF. Weitere Informationen zur Verarbeitung von Benutzerdaten durch die OSMF finden Sie in der
+        <a href="https://wiki.osmfoundation.org/wiki/Privacy_Policy" target="_blank">OSMF privacy policy</a> (englisch)<br>
+        <br>
+        Diese Website ruft von Ihrem Gerät aus Datensätze von den Servern der Overpass-API ab.
+        Hierzu wird ggf. hin und wieder Ihre GPS-Position an die Schnittstelle übermittelt.
+        <a href="https://overpass-api.de/" target="_blank">Overpass-API.de</a><br>
+        <br>
+        Diese beiden externen Dienste sind technisch notwendig, um Karte und Hydranten anzuzeigen.
+        Falls Sie damit nicht einverstanden sind, verlassen Sie bitte die Seite.
+        <br>
+        <br>
+        <button id="disclaimer" on:click={disclaimerButtonClicked} style="width: 99%; font-weight: bold; font-size: medium;">
+            Ich bin einverstanden
+        </button>
+    </div>
 </main>
 
 <style>

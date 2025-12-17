@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+	<base target="_top">
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Hydranten.EU</title>
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+
+	<!-- Primary Meta Tags -->
+	<meta name="title" content="Hydrant Radar">
+	<meta name="description" content="Die nähesten Feuerwehrhydranten, sofort!">
+
+	<!-- Open Graph / Facebook -->
+	<meta property="og:type" content="website">
+	<meta property="og:title" content="Hydrant Radar">
+	<meta property="og:description" content="Die nähesten Feuerwehrhydranten, sofort!">
+	<meta property="og:image" content="https://hydranten.eu/preview.png">
+
+	<style>
+		html, body {
+			height: 100%;
+			margin: 0;
+		}
+		.content {
+			width: 80%;
+			max-width: 80%;
+			margin: auto;
+			margin-top: 2em;
+			margin-bottom: 2em;
+		}
+		.part {
+			width: 100%;
+			max-width: 100%;
+			margin: auto;
+			margin-top: 1em;
+			margin-bottom: 1em;
+			background-color: mintcream;
+			border: dotted black 1px;
+			padding: 1em;
+			line-height: 1.7em;
+		}
+		.button {
+			height: 1.1em;
+			position:fixed;
+			z-index:1000;
+			text-align: center; padding: .1em;
+			border: 2px solid orangered;
+			border-radius: .6em;
+		}
+		.screenshot {
+			height: 30em;
+		}
+	</style>
+</head>
+<body>
+	<div class="content">
+		<div class="part">
+			<h2>Was ist das hier?</h2>
+			Diese Webanwendung soll als eine Art <b>Hydranten-Radar</b> dienen.<br>
+			Wenn Sie die Seite aufrufen und die Ermittlung Ihrer Position freigeben, dann sehen Sie:
+			<ul>
+				<li>Ihre aktuelle Position auf einer Karte.</li>
+				<li>
+					Hydranten, Saugstellen, Löschwasserbehälter und Schlüsseldepots in Ihrer Nähe,
+					sofern diese auf <a href="https://openstreetmap.org/" target="_blank">Openstreetmap</a>	eingetragen sind.<br>
+					Durch einen Klick auf die Symbole werden ggf. weitere Informationen angezeigt.
+				</li>
+				<li>
+					Kreise rund um Ihre Position, die typische Schlauchlängen (Luftlinie) repräsentieren:
+					<ul>
+						<li>Grau: 20 m (Standard B-Schlauch)</li>
+						<li>Rot: 100 m (5 B-Schläuche, oft die Länge auf einer Haspel)</li>
+						<li>Schwarz: 500 m (Ein Rollcontainer für lange Wegstrecke)</li>
+					</ul>
+				</li>
+			</ul>
+			<h3>Einschränkungen</h3>
+            <b>
+                Diese Anwendung ist eine Progressive Web App.
+                Zum erstmaligen Öffnen sowie nach dem Zurücksetzen über das Menü wird eine Internetverbindung benötigt!
+            </b>
+            <br>
+            <ul>
+            <li>POIs (Hydranten und ähnliches) in einer Entfernung von bis zu 20 km werden bis zu zwei Monate
+            zwischengespeichert.</li>
+            <li>Bereits angesehene Kartenelemente werden ebenfalls bis zu 2 Monate vorgehalten.</li>
+            <li>Ist ein POI-Datensatz bei Benutzung der Seite älter als ein Monat so wird versucht, ein neuer
+            Datensatz abzurufen.</li>
+            </ul>
+            <br>
+            Zusammengefasst: Versuchen Sie, mindestens einmal im Monat an einem Ort mit guter Internetverbindung
+            den Menüeintrag "Zurücksetzen" zu verwenden und betrachten Sie idealerweise anschließend das übliche
+            Einsatzgebiet
+            auf verschiedenen Zoom-Stufen. Fehlt im Einsatz Kartenmaterial und eine Internetverbindung steht
+            nicht zur Verfügung,
+            so müssen Sie sich anhand Ihres GPS-Standortes, der Himmelsrichtungen und der Schlauchlängenkreise
+            behelfen.
+            <br><br>
+            <b>
+                Diese Anwendung ist nur als zusätzliche Hilfe gedacht, um Hydranten schneller zu finden!<br>
+                Sollte sie keine Hydranten in der Nähe anzeigen, oder nicht auffindbare Hydranten anzeigen,
+                dann ist im Zweifelsfall immer die normale Hydrantensuche Vorzuziehen!
+            </b>
+		</div>
+		<div class="part">
+			<h2>Was bedeuten die Knöpfe?</h2>
+			<ul>
+				<li><b>GPS</b>: Schaltet ein oder aus, ob die Karte Ihrer aktuellen Position folgt.</li>
+				<li>
+					<b>☰</b>: Zeigt Hydranten und andere Elemente schwächer an, wenn für diese alle relevanten Informationen vorliegen.
+					Versteckt außerdem die Distanz-Kreise. In diesem Modus können Sie prüfen, für welche Hydranten noch Informationen fehlen.
+					Es werden außerdem Menüeinträge angezeigt, siehe unten.<br>
+					Folgende Informationen sind nötig, damit ein Hydrant schwächer angezeigt wird:
+					<ul>
+						<li>Position (Straßenfläche, Gehweg, Grünfläche, ...)</li>
+						<li>Wasserquelle (Meistens Trinkwassernetz)</li>
+						<li>Leitungsdurchmesser (Nur für Unterflurhydranten)</li>
+						<li>Hausnummer, besser die gesamte Adresse (Zur Anzeige im tabellarischen Hydrantenplan, siehe CSV.)</li>
+					</ul>
+				</li>
+				<li>
+					<b>CSV-Tabelle</b>: Lädt Ihnen eine CSV-Datei herunter, die alle Elemente im angezeigten Kartenbereich enhält.
+					Diese Datei kann z. B. in Microsoft Excel oder in LibreOffice geöffnet werden
+					und dient dann als tabellarischer Hydrantenplan.
+				</li>
+                <li>
+                    <b>Checkliste</b>: Öffnet einen neuen Tab mit einer druckbaren Checkliste für die Hydrantenprüfung.
+                    Die Liste enthält alle Hydranten, die sich im angezeigten Kartenausschnitt befinden,
+                    egal ob diese gerade angezeigt werden oder nicht. Ggf. muss für die exakte Auswahl
+                    das Browserfenster in seiner Größe angepasst werden.
+                    Es wird eine Druckseite pro Straße erzeugt, die Einträge sind nach Hausnummern sortiert.
+                </li>
+                <li>
+                    <b>Zurücksetzen</b>: Löscht alle im Browser zwischengespeicherten Daten:
+                    <ul>
+                        <li>Hydrantendaten</li>
+                        <li>Kartenausschnitte</li>
+                        <li>Die Anwendung (Progressive Web Application)</li>
+                    </ul>
+                    Im Anschluss wird die Anwendung neu geladen und neue Hydrantendaten abgefragt.
+                </li>
+			</ul>
+		</div>
+		<div class="part">
+			<h2>Häufig gestellte Fragen</h2>
+
+			<h3>Die Karte zeigt nicht meine aktuelle Position an, wie kann ich das beheben?</h3>
+			<ul>
+				<li>
+					Wichtig ist zuerst, dass Sie die Seite auf einem Mobilgerät aufrufen. Die meisten Desktoprechner und Laptops
+					kennen ihre eigene Position nicht genau.
+				</li>
+				<li>
+					Standardmäßig erlaubt Ihr mobiler Browser Websites nicht die Ermittlung Ihres Standorts.
+					Sie sollten beim ersten Aufruf der Seite gefragt werden, ob Sie dies erlauben wollen.
+				</li>
+                <li>
+                    Unter Firefox auf Android-Geräten erhält die App manchmal stark abweichende Positionsdaten,
+                    teils um mehrere Hundert Meter.<br>
+                    In Chrome auf Android wurde dieses Problem bisher nicht beobachtet,
+                    sofern Chrome in den Android-Einstellungen die Berechtigung für die exakte GPS-Position erhalten hat.
+                </li>
+			</ul>
+			<img src="images/help/de/enable_gps_1_de.png" class="screenshot">
+			<img src="images/help/de/enable_gps_2_de.png" class="screenshot">
+
+			<h3>Warum sehe ich keine Hydranten in meiner Nähe?</h3>
+			Diese Seite kann nur Hydranten anzeigen, die auf <a href="https://openstreetmap.org/" target="_blank">Openstreetmap</a> eingetragen sind.<br>
+			Mit folgender <a href="https://openstreetmap.de/123/" target="_blank">Schritt-für-Schritt-Anleitung</a>
+			können Sie lernen, wie Sie sich dort anmelden und es gibt eine
+			<a href="https://www.youtube.com/watch?v=4UFf0UOSlJY" target="_blank">Video-Einführung</a> in die eigentliche Bearbeitung.<br>
+			<b>Wichtig</b>: Fügen Sie bitte nur Hydranten hinzu, die Sie zuvor persönlich vor Ort gesehen haben.
+
+            <h3>Wie mappe ich Hydranten am besten?</h3>
+            Beispiel Unterflurhydrant:<br>
+            <pre>
+emergency=fire_hydrant
+fire_hydrant:diameter=200
+fire_hydrant:position=lane
+fire_hydrant:type=underground
+object:city=Dettelbach
+object:housenumber=1
+object:postcode=97337
+object:street=Schweinfurter Straße
+water_source=main</pre>
+            Beispiel Überflurhydrant:<br>
+            <pre>
+colour=red
+couplings=2
+emergency=fire_hydrant
+fire_hydrant:position=sidewalk
+fire_hydrant:type=pillar
+object:city=Dettelbach
+object:housenumber=14
+object:postcode=97337
+object:street=Würzburger Straße
+water_source=main</pre>
+            Im Zweifelsfall können die Hydranten, Saugstellen, Schlüsseldepots etc. in
+            <a href="https://www.openstreetmap.org/#map=19/49.802157/10.160428" target="_blank">Dettelbach</a>
+            und seinen Ortsteilen als Vorlage verwendet werden.<br>
+            <h3>Wie kann ich das Projekt unterstützen?</h3>
+            Am besten kannst du Hydranten.EU (und die OpenStreetMap-Community) unterstützen,
+            indem du Hydranten auf <a href="https://openstreetmap.org/" target="_blank">OpenStreetMap</a>
+            hinzufügst und pflegst.<br>
+            Falls du einen finanziellen Beitrag leisten möchtest, dann unterstütze doch
+            <ul>
+                <li>
+                    <a href="https://fossgis.de/" target="_blank">FOSSGIS e. V.</a>,
+                    die die Overpass-API betreiben, oder auch
+                </li>
+                <li>
+                    <a href="https://supporting.openstreetmap.org/" target="_blank">OpenStreetMap</a>,
+                    die unter anderem die Hintergrundkarte bereitstellen.
+                </li>
+            </ul>
+		</div>
+		<div class="part">
+			<h2>Welche Daten werden gespeichert?</h2>
+			<ul>
+				<li>Der Server dieser Seite erhält nie Ihre Positionsdaten.</li>
+				<li>
+					Das Quadrat um Ihre Position herum (oder jeden anderen Ort den Sie aufrufen)
+                    wird an die <a href="https://overpass-api.de/" target="_blank">Overpass-API</a> gesendet,
+					damit Ihnen die Hydranten in der Nähe dargestellt werden können.<br>
+					Prinzipiell könnte auch der
+                    <a href="https://tile.openstreetmap.org/" target="_blank">Openstreetmap Tile-Server</a>
+					Ihre ungefähre Position erfahren, da von dort die Kartenteile in Ihrer Nähe heruntergeladen werden.
+                    Diese werden aber auch geladen, wenn Sie das GPS ausschalten und andere Orte auf der Karte ansehen.
+				</li>
+				<li>
+					Ihre IP-Adresse wird nicht von diesem Server geloggt.<br>
+					Ggf. speichert jedoch einer oder mehrere der folgenden Dienste Ihre IP-Adresse:
+					<ul>
+						<li><a href="https://overpass-api.de/" target="_blank">Overpass-API</a>: Ermittelt die Hydranten in Ihrer Nähe.</li>
+						<li><a href="https://leafletjs.com/" target="_blank">Leaflet JS</a>: Hilft beim Anzeigen der Karte und der Hydranten.</li>
+						<li><a href="https://tile.openstreetmap.org/" target="_blank">Openstreetmap Tile-Server</a>: Liefert die Kartenteile.</li>
+					</ul>
+				</li>
+			</ul>
+		</div>
+        <div class="part">
+            <h2>Kontakt</h2>
+            E-Mail: <a href="mailto:mail@hydranten.eu">mail@hydranten.eu</a><br>
+            <a href="https://github.com/BitScout/hydrant_radar/issues">GitHub</a> (Quellcode und Ticketsystem)
+        </div>
+        <br><br>
+	</div>
+</body>
+</html>

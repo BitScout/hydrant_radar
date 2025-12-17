@@ -32,8 +32,6 @@ A map of nearby fire hydrants and other stuff
 
 ## Technology
 
-![](doc/images/system_overview.jpg)
-
 * Uses the default OSM map, using https://leafletjs.com/index.html.
   Tiles are cached for up to 60 days.
 * Queries POIs from the Overpass API and stores them for 60 days in local memory.
@@ -62,4 +60,10 @@ The `movementLimit` should be about half of `latLonRange`.
 
 ## References
 
+### OSM
 * Southwest German specialty: Würtemmberger Schachthydranten: https://wiki.openstreetmap.org/wiki/DE:Tag:emergency=fire_hydrant#Besondere_Bauformen
+
+### Legal
+
+* https://osmfoundation.org/wiki/Services_and_tile_users_privacy_FAQ
+
