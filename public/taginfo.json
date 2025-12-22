@@ -13,83 +13,102 @@
     {
       "key": "leisure",
       "value": "swimming_pool",
-      "object_types": ["way"]
+      "object_types": ["way"],
+      "description": "Used to show swimming pools and calculate their surface. They can be used in an emergency to guesstimate the amount of water available if other water sources are unavailable or insufficient."
     },
     {
       "key": "emergency",
       "value": "fire_hydrant",
-      "object_types": ["node"]
+      "object_types": ["node"],
+      "description": "Used to show fire hydrants (above and below ground)."
     },
     {
       "key": "emergency",
       "value": "suction_point",
-      "object_types": ["node"]
+      "object_types": ["node"],
+      "description": "Used to show suction points for obtaining water for firefighting."
     },
     {
       "key": "emergency",
       "value": "water_tank",
-      "object_types": ["node"]
+      "object_types": ["node"],
+      "description": "Used to show water tanks that are provided as reserves in case the water grid throughput is insufficient."
     },
     {
       "key": "emergency",
       "value": "key_depot",
-      "object_types": ["node"]
+      "object_types": ["node"],
+      "description": "Used to show key depots that let the fire services access keys for a building in case of a fire."
     },
     {
       "key": "fire_hydrant:type",
-      "object_types": ["node"]
+      "object_types": ["node"],
+      "description": "Used to distinguish above ground fire hydrants from underground ones."
     },
     {
       "key": "fire_hydrant:position",
-      "object_types": ["node"]
+      "object_types": ["node"],
+      "description": "Used to show if the hydrant is located on the sidewalk, in the street, next to the street or on a praking space."
     },
     {
       "key": "fire_hydrant:diameter",
-      "object_types": ["node"]
+      "object_types": ["node"],
+      "description": "Used to show the diameter in millimetres of the pipe supplying the hydrant."
     },
     {
       "key": "fire_hydrant:style",
-      "object_types": ["node"]
+      "object_types": ["node"],
+      "description": "Currently only used to inform users if a hydrant is a Württemberger Schachthydrant from the southwest of Germany."
     },
     {
       "key": "ref",
-      "object_types": ["node"]
+      "object_types": ["node"],
+      "description": "Used to show the hydrant's reference number."
     },
     {
       "key": "water_source",
-      "object_types": ["node"]
+      "object_types": ["node"],
+      "description": "Used to show, how the hydrant is provided with water, usually mains."
     },
     {
       "key": "colour",
-      "object_types": ["node"]
+      "object_types": ["node"],
+      "description": "Used to optionally colour hydrants blue for separate firefighting water systems."
     },
     {
       "key": "name",
-      "object_types": ["node"]
+      "object_types": ["node"],
+      "description": "Used to show an optional name."
     },
     {
       "key": "description",
-      "object_types": ["node"]
+      "object_types": ["node"],
+      "description": "Used to show an optional description."
     },
     {
       "key": "object:housenumber",
-      "object_types": ["node"]
+      "object_types": ["node"],
+      "description": "Used to show the house number in popups when the menu is open and in exports."
     },
     {
       "key": "object:street",
-      "object_types": ["node"]
+      "object_types": ["node"],
+      "description": "Used to show the street name in popups when the menu is open and in exports."
     },
     {
       "key": "object:city",
-      "object_types": ["node"]
+      "object_types": ["node"],
+      "description": "Used to show the street name in exports."
     },
     {
       "key": "object:subdistrict",
-      "object_types": ["node"]
+      "object_types": ["node"],
+      "description": "Used to show the subdistrict name in exports."
     },
     {
       "key": "object:postcode",
-      "object_types": ["node"]
+      "object_types": ["node"],
+      "description": "Used to show the postcode in exports."
     }
   ]
 }
