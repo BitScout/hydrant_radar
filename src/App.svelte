@@ -32,7 +32,7 @@
     async function hideDisclaimerIfAccepted() {
         let disclaimerAcceptedTimestamp = await localforage.getItem("disclaimerAccepted");
 
-        if (disclaimerAcceptedTimestamp > 0) {
+        if (disclaimerAcceptedTimestamp > 1766319991000) {
             initApp();
         }
     }
@@ -539,7 +539,7 @@
     </button>
     <div id="disclaimerPopup">
         <b style="color: red;">
-            Bei Problemen mit der App oder im Zweifelsfall<br>
+            Bei Problemen mit der App oder im Zweifelsfall
             sofort zur konventionellen Hydrantensuche wechseln!</b>
         <br>
         <hr>
@@ -556,8 +556,8 @@
         <a href="https://wiki.osmfoundation.org/wiki/Privacy_Policy" target="_blank">OSMF privacy policy</a> (englisch)<br>
         <br>
         Diese Website ruft von Ihrem Gerät aus Datensätze von den Servern der Overpass-API ab.
-        Hierzu wird ggf. hin und wieder Ihre GPS-Position an die Schnittstelle übermittelt.
-        <a href="https://overpass-api.de/" target="_blank">Overpass-API.de</a><br>
+        Hierzu wird ggf. hin und wieder implizit Ihre GPS-Position an die Schnittstelle übermittelt.
+        Siehe <a href="https://overpass-api.de/" target="_blank">Overpass-API.de</a><br>
         <br>
         Diese beiden externen Dienste sind technisch notwendig, um Karte und Hydranten anzuzeigen.
         Falls Sie damit nicht einverstanden sind, verlassen Sie bitte die Seite.
