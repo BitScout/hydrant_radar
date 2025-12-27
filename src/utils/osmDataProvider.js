@@ -1,9 +1,11 @@
 import localforage from "localforage";
 
+import {getConfigValue} from './config.js';
 import {
     buildApiBoundsString,
     generateRequiredBoundsForMap,
-    generateExtendedBoundsForMap
+    generateExtendedBoundsForMap,
+    shouldMapBoundsBeLoaded
 } from './mapBoundsHelpers.js';
 
 const daysAfterWhichToRequestNewData = 1; // If the latest OSM API dataset is older than this many days, a new one will be requested.
@@ -18,10 +20,15 @@ export async function getOsmItems(map, callback) {
         console.log("Offline data found, " + osmApiDatasets.length + " entries.");
         osmApiDatasets = cleanupStoredDatasets(osmApiDatasets, daysAfterWhichRequestIsInvalidated);
 
+        let requestedBounds = generateRequiredBoundsForMap(map);
+
+        if (!shouldMapBoundsBeLoaded(requestedBounds)) {
+            return;
+        }
+
         let datasetsMatchingRequestedBounds = [];
         osmApiDatasets.forEach((item, index) => {
             let datasetBounds = item.bounds;
-            let requestedBounds = generateRequiredBoundsForMap(map);
 
             if (datasetBounds.west <= requestedBounds.west
                 && datasetBounds.east >= requestedBounds.east
@@ -52,8 +59,16 @@ export async function getOsmItems(map, callback) {
 }
 
 function handleRequestResult(map, response, callback) {
+    if (map.getZoom() <= getConfigValue('minLoadItemsZoom')) {
+        return;
+    }
+
     let rb = generateRequiredBoundsForMap(map);
     let responseItems = [];
+
+    if (!shouldMapBoundsBeLoaded(rb)) {
+        return;
+    }
 
     for (const item of response.elements) {
         let c;

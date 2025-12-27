@@ -2,6 +2,7 @@
     import { setupPWA } from './pwa.js';
     import {onMount} from 'svelte';
     import L from 'leaflet';
+    import {getConfigValue} from "./utils/config.js";
     import { generateCsv } from './utils/csvExporter.js';
     import { generateAuditChecklist } from './utils/checklistGenerator.js';
     import { calculateSurfaceArea } from './utils/surfaceCaclulator.js';
@@ -90,8 +91,8 @@
 
         map = L.map(mapDiv).setView(initialPosition, 19);
         const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 20,
-            minZoom: 4,
+            maxZoom: getConfigValue('maxZoom'),
+            minZoom: getConfigValue('minZoom'),
             attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> | <a href="https://www.feuerwehr-dettelbach.de/" target="_blank">FF Dettelbach</a> | <a href="https://github.com/BitScout/hydrant_radar" target="_blank">GitHub</a> | <a href="mailto:mail@hydranten.eu" target="_blank">Email</a> | <a href="https://legacy.hydranten.eu/" target="_blank">Alte Version</a>'
         }).addTo(map);
     }

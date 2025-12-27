@@ -1,4 +1,6 @@
 
+import {getConfigValue} from './config.js';
+
 export function buildApiBoundsString(bounds) {
     return bounds.south + ',' + bounds.west + ',' + bounds.north + ',' + bounds.east;
 }
@@ -43,4 +45,28 @@ export function convertBoundsToLeafletBounds(bounds) {
 
 export function roundCoord(input) {
     return Math.round(input * 100000) / 100000;
+}
+
+export function shouldMapBoundsBeLoaded(bounds) {
+    return getConfigValue('maxLoadingBoundsKm') >= calcDistance(bounds);
+}
+
+export function calcDistance(bounds)
+{
+    let R = 6371; // km
+    let dLat = toRad(bounds.south - bounds.north);
+    let dLon = toRad(bounds.east - bounds.west);
+    let lat1 = toRad(bounds.north);
+    let lat2 = toRad(bounds.south);
+
+    let a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2);
+    let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+    return R * c;
+}
+
+function toRad(Value)
+{
+    return Value * Math.PI / 180;
 }
