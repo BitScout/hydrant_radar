@@ -7,42 +7,49 @@
     "description": "A radar for hydrants, and a helper for keeping track of them",
     "project_url": "https://hydranten.eu/",
     "contact_name": "Christian Kollross",
-    "contact_email": "mail@hydranten.eu"
+    "contact_email": "mail@hydranten.eu",
+    "icon_url": "https://hydranten.eu/hydranten.svg"
   },
   "tags": [
     {
       "key": "leisure",
       "value": "swimming_pool",
       "object_types": ["way"],
+      "icon_url": "https://hydranten.eu/images/icon_swimming_pool.png",
       "description": "Used to show swimming pools and calculate their surface. They can be used in an emergency to guesstimate the amount of water available if other water sources are unavailable or insufficient."
     },
     {
       "key": "emergency",
       "value": "fire_hydrant",
       "object_types": ["node"],
+      "icon_url": "https://hydranten.eu/images/icon_hydrant_red.png",
       "description": "Used to show fire hydrants (above and below ground)."
     },
     {
       "key": "emergency",
       "value": "suction_point",
       "object_types": ["node"],
+      "icon_url": "https://hydranten.eu/images/icon_suction_point.png",
       "description": "Used to show suction points for obtaining water for firefighting."
     },
     {
       "key": "emergency",
       "value": "water_tank",
       "object_types": ["node"],
+      "icon_url": "https://hydranten.eu/images/icon_water_tank.png",
       "description": "Used to show water tanks that are provided as reserves in case the water grid throughput is insufficient."
     },
     {
       "key": "emergency",
       "value": "key_depot",
       "object_types": ["node"],
+      "icon_url": "https://hydranten.eu/images/icon_key_depot.png",
       "description": "Used to show key depots that let the fire services access keys for a building in case of a fire."
     },
     {
       "key": "fire_hydrant:type",
       "object_types": ["node"],
+      "icon_url": "https://hydranten.eu/images/icon_hydrant_red_underground.png",
       "description": "Used to distinguish above ground fire hydrants from underground ones."
     },
     {
@@ -58,6 +65,7 @@
     {
       "key": "fire_hydrant:style",
       "object_types": ["node"],
+      "icon_url": "https://hydranten.eu/images/icon_hydrant_red_underground_wsh.png",
       "description": "Currently only used to inform users if a hydrant is a Württemberger Schachthydrant from the southwest of Germany."
     },
     {
@@ -68,11 +76,13 @@
     {
       "key": "water_source",
       "object_types": ["node"],
-      "description": "Used to show, how the hydrant is provided with water, usually mains."
+      "icon_url": "https://hydranten.eu/images/icon_hydrant_blue_underground.png",
+      "description": "Used to show how the hydrant is provided with water, usually mains. For non-mains, the colour becomes blue."
     },
     {
       "key": "colour",
       "object_types": ["node"],
+      "icon_url": "https://hydranten.eu/images/icon_hydrant_blue_pillar.png",
       "description": "Used to optionally colour hydrants blue for separate firefighting water systems."
     },
     {
